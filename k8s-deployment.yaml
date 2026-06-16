@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: im-ss1
+  labels:
+    app: im-ss1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: im-ss1
+  template:
+    metadata:
+      labels:
+        app: im-ss1
+    spec:
+      containers:
+        - name: im-ss1
+          image: msahique/im_ss1:v1
+          ports:
+            - containerPort: 8000
+          env:
+            - name: PORT
+              value: "8000"
+            - name: HOST
+              value: "0.0.0.0"
+          volumeMounts:
+            - name: db-config
+              mountPath: /app/db_config.json
+              subPath: db_config.json
+              readOnly: true
+            - name: certificates
+              mountPath: /app/certificates
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "150m"
+              memory: "256Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+      volumes:
+        - name: db-config
+          secret:
+            secretName: im-ss1-db-config
+        - name: certificates
+          persistentVolumeClaim:
+            claimName: im-ss1-certificates-pvc
