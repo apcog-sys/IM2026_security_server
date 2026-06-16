@@ -1,0 +1,3303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>System Configuration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            padding: 20px;
+        }
+
+        .container {
+            max-height: 90vh;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background-color: #2c3e50;
+            color: white;
+            padding: 20px;
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        .content-wrapper {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        .sidebar {
+            width: 250px;
+            background-color: #34495e;
+            border-right: 2px solid #2c3e50;
+            overflow-y: auto;
+            transition: width 0.3s ease;
+        }
+
+        .sidebar.collapsed {
+            width: 60px;
+        }
+
+        .toggle-btn {
+            background-color: #2c3e50;
+            color: white;
+            border: none;
+            padding: 15px;
+            width: 100%;
+            text-align: center;
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-btn:hover {
+            background-color: #1a252f;
+        }
+
+        .main-tab-btn {
+            width: 100%;
+            padding: 15px 20px;
+            border: none;
+            background-color: transparent;
+            color: white;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            border-left: 4px solid transparent;
+            transition: all 0.3s ease;
+            text-align: left;
+        }
+
+        .main-tab-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-left-color: #3498db;
+        }
+
+        .main-tab-btn.active {
+            background-color: rgba(52, 152, 219, 0.2);
+            border-left-color: #3498db;
+            color: #3498db;
+        }
+
+        .sidebar.collapsed .main-tab-btn {
+            padding: 15px 8px;
+            font-size: 0;
+        }
+
+        .sidebar.collapsed .main-tab-btn::before {
+            content: "⚙";
+            font-size: 14px;
+        }
+
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .main-tab-content {
+            display: none;
+        }
+
+        .main-tab-content.active {
+            display: block;
+        }
+
+        .sub-tabs {
+            display: flex;
+            gap: 10px;
+            border-bottom: 1px solid #e0e0e0;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .sub-tab-btn {
+            padding: 10px 20px;
+            border: none;
+            background-color: #f0f0f0;
+            cursor: pointer;
+            border-radius: 4px 4px 0 0;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border-bottom: 2px solid transparent;
+        }
+
+        .sub-tab-btn:hover {
+            background-color: #e8e8e8;
+        }
+
+        .sub-tab-btn.active {
+            background-color: white;
+            color: #3498db;
+            border-bottom-color: #3498db;
+        }
+
+        .sub-tab-content {
+            display: none;
+        }
+
+        .sub-tab-content.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            display: block;
+            visibility: visible;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+            visibility: visible;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        input[type="number"],
+        input[type="email"],
+        select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+            display: block;
+            visibility: visible;
+            box-sizing: border-box;
+        }
+
+        input[type="text"]:focus,
+        input[type="password"]:focus,
+        input[type="number"]:focus,
+        input[type="email"]:focus,
+        select:focus {
+            outline: none;
+            border-color: #3498db;
+            box-shadow: 0 0 5px rgba(52, 152, 219, 0.3);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: #3498db;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: #2980b9;
+        }
+
+        .btn-success {
+            background-color: #27ae60;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background-color: #229954;
+        }
+
+        .btn-danger {
+            background-color: #e74c3c;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background-color: #c0392b;
+        }
+
+        .btn-secondary {
+            background-color: #95a5a6;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background-color: #7f8c8d;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            margin: 0 4px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-small:hover {
+            background-color: #2980b9;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            font-size: 14px;
+        }
+
+        .alert-success {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .alert-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .alert-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+
+        th {
+            background-color: #34495e;
+            color: white;
+            padding: 12px;
+            text-align: left;
+            font-weight: bold;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-sm {
+            padding: 5px 10px;
+            font-size: 12px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+
+        .status-success {
+            background-color: #d4edda;
+            color: #155724;
+        }
+
+        .status-info {
+            background-color: #d1ecf1;
+            color: #0c5460;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background-color: white;
+            padding: 30px;
+            border-radius: 8px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .modal-footer {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            margin-top: 20px;
+        }
+
+        /* Scrollable Modal for Client Services */
+        #client-service-modal .modal-content {
+            max-width: 700px;
+            max-height: 90vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+        }
+
+        #client-service-modal .modal-content::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        #client-service-modal .modal-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+        }
+
+        #client-service-modal .modal-content::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 4px;
+        }
+
+        #client-service-modal .modal-content::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">System Configuration</div>
+
+        <div class="content-wrapper">
+            <!-- Sidebar Navigation -->
+            <div class="sidebar" id="sidebar">
+                <button class="toggle-btn" onclick="toggleSidebar()" title="Toggle Sidebar">☰</button>
+                <button class="main-tab-btn active" onclick="switchMainTab('system-config')" data-tab="system-config">⚙️ System Configuration</button>
+                <button class="main-tab-btn" onclick="switchMainTab('entity')" data-tab="entity">🏢 My Server</button>
+                <button class="main-tab-btn" onclick="switchMainTab('my-services')" data-tab="my-services">📱 My Services</button>
+                <button class="main-tab-btn" onclick="switchMainTab('client-services')" data-tab="client-services">🔗 Services Providers</button>
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="main-content">
+                <div id="system-config" class="main-tab-content active">
+                    <div class="sub-tabs">
+                        <button class="sub-tab-btn active" onclick="switchSubTab('db-config')">DB Configuration</button>
+                        <button class="sub-tab-btn" onclick="switchSubTab('network-config')">Network Configuration</button>
+                        <button class="sub-tab-btn" onclick="switchSubTab('global-server-config')">Global Server Configuration</button>
+                    </div>
+
+                    <!-- DB Configuration Tab -->
+                    <div id="db-config" class="sub-tab-content active">
+                        <div id="db-alert"></div>
+                        <h3 style="margin-bottom: 20px; color: #2c3e50;">Database Connection Configuration</h3>
+                        
+                        <div class="form-group">
+                            <label for="db_host">Database Host:</label>
+                            <input type="text" id="db_host" placeholder="e.g., localhost">
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="db_port">Port:</label>
+                                <input type="number" id="db_port" placeholder="e.g., 3306" value="3306">
+                            </div>
+                            <div class="form-group">
+                                <label for="db_user">Username:</label>
+                                <input type="text" id="db_user" placeholder="e.g., root">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="db_password">Password:</label>
+                                <input type="password" id="db_password">
+                            </div>
+                            <div class="form-group">
+                                <label for="db_name">Database Name:</label>
+                                <input type="text" id="db_name" placeholder="e.g., gateway1">
+                            </div>
+                        </div>
+
+                        <div class="button-group">
+                            <button class="btn-primary" onclick="testDBConnection()">Test Connection</button>
+                            <button class="btn-success" onclick="saveDBConfig()">Save Configuration</button>
+                        </div>
+
+                        <div style="margin-top: 20px; padding: 15px; background-color: #f9f9f9; border-radius: 4px;">
+                            <h4 style="margin-bottom: 10px; color: #2c3e50;">Current Configuration:</h4>
+                            <div id="current-db-config" style="font-family: monospace; color: #555;">No configuration saved yet</div>
+                        </div>
+                    </div>
+
+                    <!-- Network Configuration Tab -->
+                    <div id="network-config" class="sub-tab-content">
+                        <div id="network-alert"></div>
+                        <h3 style="margin-bottom: 20px; color: #2c3e50;">Network Configuration Management</h3>
+
+                        <div style="margin-bottom: 20px; display: flex; gap: 10px;">
+                            <button class="btn-primary" onclick="showAddNetworkForm()">+ Add New Network Config</button>
+                            <button class="btn-primary" onclick="showGlobalServerRegistrationModal()">🌐 Global Server Registration</button>
+                        </div>
+
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>ID</th>
+                                        <th>Title</th>
+                                        <th>Host</th>
+                                        <th>Port</th>
+                                        <th>IP Address</th>
+                                        <th>Environment</th>
+                                        <th>Created At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="network-table-body">
+                                    <tr>
+                                        <td colspan="8" style="text-align: center; color: #999;">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Global Server Configuration Tab -->
+                    <div id="global-server-config" class="sub-tab-content">
+                        <div id="global-server-alert"></div>
+                        <h3 style="margin-bottom: 20px; color: #2c3e50;">Global Server Configuration</h3>
+                        <p style="margin-bottom: 20px; padding: 10px; background-color: #e8f4f8; border-left: 4px solid #3498db; color: #2c3e50; font-weight: bold; border-radius: 4px;">⚠️ You can register only one global server</p>
+
+                        <!-- Edit/Add Form Section -->
+                        <div style="background-color: #f8f9fa; border: 1px solid #ddd; border-radius: 4px; padding: 20px; margin-bottom: 30px; display: block; visibility: visible;">
+                            <h4 style="color: #2c3e50; margin-bottom: 15px;">Add / Update Global Server</h4>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="gs_edit_server_name">Server Name:</label>
+                                    <input type="text" id="gs_edit_server_name" placeholder="e.g., GlobalServer1">
+                                </div>
+                                <div class="form-group">
+                                    <label for="gs_edit_server_url">Server URL:</label>
+                                    <input type="text" id="gs_edit_server_url" placeholder="e.g., https://global-server.com">
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="gs_edit_api_key">API Key:</label>
+                                    <input type="password" id="gs_edit_api_key" placeholder="Enter API Key (leave empty to keep existing)">
+                                </div>
+                                <div class="form-group">
+                                    <label for="gs_edit_description">Description:</label>
+                                    <input type="text" id="gs_edit_description" placeholder="Description of the global server">
+                                </div>
+                            </div>
+
+                            <div class="button-group">
+                                <button class="btn-success" onclick="saveGlobalServerConfigDirect()">💾 Save Configuration</button>
+                                <button class="btn-secondary" onclick="clearGlobalServerForm()">🔄 Clear Form</button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+                <!-- Entity Tab -->
+                <div id="entity" class="main-tab-content">
+                    <div class="sub-tabs">
+                        <button class="sub-tab-btn active" onclick="switchSubTab('owner-org')">Owner Organisation Details</button>
+                        <button class="sub-tab-btn" onclick="switchSubTab('digital-signature')">Digital Signature Certificate</button>
+                    </div>
+
+                    <!-- Owner Organisation Details Tab -->
+                    <div id="owner-org" class="sub-tab-content active">
+                        <div id="owner-alert"></div>
+                        <h3 style="margin-bottom: 20px; color: #2c3e50;">Owner Organisation Management</h3>
+
+                        <div style="margin-bottom: 20px;">
+                            <button class="btn-primary" onclick="showAddOwnerForm()">+ Add New Organisation</button>
+                        </div>
+
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Entity Code</th>
+                                        <th>Entity Name</th>
+                                        <th>Contact Person</th>
+                                        <th>Email</th>
+                                        <th>Phone</th>
+                                        <th>City</th>
+                                        <th>Country</th>
+                                        <th>Created At</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="owner-table-body">
+                                    <tr>
+                                        <td colspan="9" style="text-align: center; color: #999;">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Digital Signature Certificate Tab -->
+                    <div id="digital-signature" class="sub-tab-content">
+                        <div id="signature-alert"></div>
+                        
+                        <div class="form-group">
+                            <label for="sig_entity_select">Select Organization:</label>
+                            <select id="sig_entity_select" onchange="populateSignatureFormFromEntity()">
+                                <option value="">-- Select Organization --</option>
+                            </select>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sig_entity_code">Entity Code:</label>
+                                <input type="text" id="sig_entity_code" placeholder="Auto-filled">
+                            </div>
+                            <div class="form-group">
+                                <label for="sig_entity_name">Entity Name:</label>
+                                <input type="text" id="sig_entity_name" placeholder="Auto-filled">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sig_contact_person">Contact Person:</label>
+                                <input type="text" id="sig_contact_person" placeholder="Auto-filled">
+                            </div>
+                            <div class="form-group">
+                                <label for="sig_email">Email:</label>
+                                <input type="email" id="sig_email" placeholder="Auto-filled">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sig_phone">Phone:</label>
+                                <input type="text" id="sig_phone" placeholder="Auto-filled">
+                            </div>
+                            <div class="form-group">
+                                <label for="sig_city">City:</label>
+                                <input type="text" id="sig_city" placeholder="Auto-filled">
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="sig_state">State:</label>
+                                <input type="text" id="sig_state" placeholder="Auto-filled">
+                            </div>
+                            <div class="form-group">
+                                <label for="sig_country">Country Code (2-letter):</label>
+                                <input type="text" id="sig_country" placeholder="Auto-filled" maxlength="2">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="sig_password">Private Key Password (Optional):</label>
+                            <input type="password" id="sig_password" placeholder="Leave empty for no encryption">
+                        </div>
+
+                        <div class="button-group">
+                            <button class="btn-primary" onclick="generateSignatureCertificate()">Generate Digital Signature Certificate</button>
+                        </div>
+
+                        <div id="signature-files-list" style="margin-top: 30px;">
+                            <h4 style="color: #2c3e50; margin-bottom: 15px;">Generated Certificates</h4>
+                            <div class="table-container">
+                                <table>
+                                    <thead>
+                                        <tr>
+                                            <th>Filename</th>
+                                            <th>Certificate Type</th>
+                                            <th>Size (KB)</th>
+                                            <th>Modified Date</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="certificates-table-body">
+                                        <tr>
+                                            <td colspan="6" style="text-align: center; color: #999;">Loading...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Infrastructure Tab -->
+                <div id="my-services" class="main-tab-content">
+                    <div class="sub-tabs">
+                        <button class="sub-tab-btn active" onclick="switchSubTab('my-applications')">Applications</button>
+                        <button class="sub-tab-btn" onclick="switchSubTab('my-services-list')">Services</button>
+                    </div>
+
+                    <!-- Applications Tab -->
+                    <div id="my-applications" class="sub-tab-content active">
+                        <div id="app-alert"></div>
+                        <h3 style="margin-bottom: 20px; color: #2c3e50;">My Applications</h3>
+
+                        <div style="margin-bottom: 20px;">
+                            <button class="btn-primary" onclick="showAddApplicationForm()">+ Add New Application</button>
+                        </div>
+
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>App Code</th>
+                                        <th>App Name</th>
+                                        <th>Type</th>
+                                        <th>Host</th>
+                                        <th>Port</th>
+                                        <th>Network</th>
+                                        <th>Status</th>
+                                        <th>Environment</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="application-table-body">
+                                    <tr>
+                                        <td colspan="9" style="text-align: center; color: #999;">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Services Tab -->
+                    <div id="my-services-list" class="sub-tab-content">
+                        <div id="serv-alert"></div>
+                        <h3 style="margin-bottom: 20px; color: #2c3e50;">My Services Management</h3>
+
+                        <div style="margin-bottom: 20px;">
+                            <button class="btn-primary" onclick="showAddServiceForm()">+ Add New Service</button>
+                        </div>
+
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Service Code</th>
+                                        <th>Service Name</th>
+                                        <th>Type</th>
+                                        <th>Method</th>
+                                        <th>Endpoint</th>
+                                        <th>App</th>
+                                        <th>Timeout</th>
+                                        <th>Status</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="service-table-body">
+                                    <tr>
+                                        <td colspan="9" style="text-align: center; color: #999;">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Client Services Tab -->
+                <div id="client-services" class="main-tab-content">
+                    <div class="sub-tabs">
+                        <button class="sub-tab-btn active" onclick="switchSubTab('client-services-list')">Services</button>
+                    </div>
+
+                    <!-- Client Services List Tab -->
+                    <div id="client-services-list" class="sub-tab-content active">
+                        <div id="client-alert"></div>
+                        <h3 style="margin-bottom: 20px; color: #2c3e50;">Client Services Management</h3>
+
+                        <div style="margin-bottom: 20px; display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                            <button class="btn-primary" onclick="showAddClientServiceForm()">+ Add New Client Service</button>
+                            <button class="btn-success" onclick="showSyncGlobalServicesModal()" style="background-color: #27ae60;">⟳ Sync from Global Server</button>
+                        </div>
+
+                        <div class="table-container">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Server ID</th>
+                                        <th>Entity</th>
+                                        <th>App Code</th>
+                                        <th>Service Code</th>
+                                        <th>Service Name</th>
+                                        <th>Type</th>
+                                        <th>Method</th>
+                                        <th>URL</th>
+                                        <th>Status</th>
+                                        <th>Source</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="client-service-table-body">
+                                    <tr>
+                                        <td colspan="11" style="text-align: center; color: #999;">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Network Config Modal -->
+    <div id="network-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="modal-title">Add Network Configuration</div>
+            <div id="modal-alert"></div>
+            
+            <div class="form-group">
+                <label for="net_id">ID (e.g., SECURITY_SERVER_1):</label>
+                <input type="text" id="net_id" placeholder="SECURITY_SERVER_1">
+            </div>
+
+            <div class="form-group">
+                <label for="net_title">Title:</label>
+                <input type="text" id="net_title" placeholder="Security Server 1">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="net_version">Version:</label>
+                    <input type="text" id="net_version" placeholder="1.0.0">
+                </div>
+                <div class="form-group">
+                    <label for="net_network_instance">Network Instance:</label>
+                    <input type="text" id="net_network_instance" placeholder="default">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="net_gateway_code">Gateway Code:</label>
+                    <input type="text" id="net_gateway_code" placeholder="GW_001">
+                </div>
+                <div class="form-group">
+                    <label for="net_entity_id">Entity ID:</label>
+                    <input type="number" id="net_entity_id" placeholder="1">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="net_host">Host:</label>
+                    <input type="text" id="net_host" placeholder="127.0.0.1">
+                </div>
+                <div class="form-group">
+                    <label for="net_port">Port:</label>
+                    <input type="number" id="net_port" placeholder="9001">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="net_hostname">Hostname:</label>
+                <input type="text" id="net_hostname" placeholder="security-gateway.federated.local">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="net_ip_address">IP Address:</label>
+                    <input type="text" id="net_ip_address" placeholder="10.0.0.50">
+                </div>
+                <div class="form-group">
+                    <label for="net_environment">Environment:</label>
+                    <select id="net_environment">
+                        <option value="DEV">DEV</option>
+                        <option value="TEST">TEST</option>
+                        <option value="PROD">PROD</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeNetworkModal()">Cancel</button>
+                <button class="btn-success" id="modal-save-btn" onclick="saveNetworkConfig()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Owner Organisation Modal -->
+    <div id="owner-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="owner-modal-title">Add Organisation</div>
+            <div id="owner-modal-alert"></div>
+            
+            <div class="form-group">
+                <label for="owner_code">Entity Code (e.g., ORG_001):</label>
+                <input type="text" id="owner_code" placeholder="ORG_001">
+            </div>
+
+            <div class="form-group">
+                <label for="owner_name">Entity Name:</label>
+                <input type="text" id="owner_name" placeholder="Organisation Name">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="owner_contact">Contact Person:</label>
+                    <input type="text" id="owner_contact" placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label for="owner_email">Email:</label>
+                    <input type="email" id="owner_email" placeholder="contact@org.com">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="owner_phone">Phone:</label>
+                    <input type="text" id="owner_phone" placeholder="+1-234-567-8900">
+                </div>
+                <div class="form-group">
+                    <label for="owner_country">Country:</label>
+                    <input type="text" id="owner_country" placeholder="USA">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="owner_state">State:</label>
+                    <input type="text" id="owner_state" placeholder="California">
+                </div>
+                <div class="form-group">
+                    <label for="owner_city">City:</label>
+                    <input type="text" id="owner_city" placeholder="San Francisco">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="owner_address">Address:</label>
+                <textarea id="owner_address" placeholder="Full address" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px;"></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeOwnerModal()">Cancel</button>
+                <button class="btn-success" id="owner-modal-save-btn" onclick="saveOwnerOrganisation()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Application Modal -->
+    <div id="application-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="application-modal-title">Add Application</div>
+            <div id="application-modal-alert"></div>
+            
+            <div class="form-group">
+                <label for="app_code">App Code (e.g., APP_001):</label>
+                <input type="text" id="app_code" placeholder="APP_001">
+            </div>
+
+            <div class="form-group">
+                <label for="app_name">App Name:</label>
+                <input type="text" id="app_name" placeholder="My Application">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="app_network_id">Network ID (Gateway):</label>
+                    <select id="app_network_id" required>
+                        <option value="">-- Select Gateway (Network) --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="app_entity_id">Entity ID (Optional):</label>
+                    <input type="number" id="app_entity_id" placeholder="1">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="app_host">Host/IP:</label>
+                    <input type="text" id="app_host" placeholder="127.0.0.1">
+                </div>
+                <div class="form-group">
+                    <label for="app_port">Port:</label>
+                    <input type="number" id="app_port" placeholder="8080">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="app_protocol">Protocol:</label>
+                    <select id="app_protocol">
+                        <option value="HTTP">HTTP</option>
+                        <option value="HTTPS">HTTPS</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="app_version">Version:</label>
+                    <input type="text" id="app_version" placeholder="1.0.0">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="app_status">Status:</label>
+                    <select id="app_status">
+                        <option value="PENDING">PENDING</option>
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="app_environment">Environment:</label>
+                    <select id="app_environment">
+                        <option value="DEV">DEV</option>
+                        <option value="TEST">TEST</option>
+                        <option value="PROD">PROD</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="app_admin_name">Administrator:</label>
+                    <input type="text" id="app_admin_name" placeholder="John Doe">
+                </div>
+                <div class="form-group">
+                    <label for="app_admin_email">Admin Email:</label>
+                    <input type="email" id="app_admin_email" placeholder="admin@example.com">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="app_admin_phone">Admin Phone:</label>
+                <input type="text" id="app_admin_phone" placeholder="+1-234-567-8900">
+            </div>
+
+            <div class="form-group">
+                <label for="app_description">Description:</label>
+                <textarea id="app_description" placeholder="App description" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeApplicationModal()">Cancel</button>
+                <button class="btn-success" id="application-modal-save-btn" onclick="saveApplication()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Service Modal -->
+    <div id="service-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="service-modal-title">Add Service</div>
+            <div id="service-modal-alert"></div>
+            
+            <div class="form-group">
+                <label for="service_code">Service Code (e.g., SVC_001):</label>
+                <input type="text" id="service_code" placeholder="SVC_001">
+            </div>
+
+            <div class="form-group">
+                <label for="service_name">Service Name:</label>
+                <input type="text" id="service_name" placeholder="My Service">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="service_app_id">Application:</label>
+                    <select id="service_app_id">
+                        <option value="">-- Select Application --</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="service_type">Service Type:</label>
+                    <select id="service_type">
+                        <option value="REST">REST</option>
+                        <option value="SOAP">SOAP</option>
+                        <option value="INTERNAL">INTERNAL</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="service_method">Method:</label>
+                    <select id="service_method">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="service_endpoint">Endpoint Path:</label>
+                    <input type="text" id="service_endpoint" placeholder="/api/users">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="service_full_url">Full URL (Optional):</label>
+                <input type="text" id="service_full_url" placeholder="http://127.0.0.1:8080/api/users">
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="service_api_version">API Version:</label>
+                    <input type="text" id="service_api_version" value="v1.0" placeholder="v1.0">
+                </div>
+                <div class="form-group">
+                    <label for="service_timeout">Timeout (seconds):</label>
+                    <input type="number" id="service_timeout" value="30" placeholder="30">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="service_retry">Retry Count:</label>
+                    <input type="number" id="service_retry" value="3" placeholder="3">
+                </div>
+                <div class="form-group">
+                    <label for="service_status">Status:</label>
+                    <select id="service_status">
+                        <option value="ACTIVE">ACTIVE</option>
+                        <option value="INACTIVE">INACTIVE</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label><input type="checkbox" id="service_is_public"> Make Public (External Exposure)</label>
+            </div>
+
+            <div class="form-group">
+                <label for="service_description">Description:</label>
+                <textarea id="service_description" placeholder="Service description" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeServiceModal()">Cancel</button>
+                <button class="btn-success" id="service-modal-save-btn" onclick="saveService()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- View Certificate Modal -->
+    <div id="certificate-view-modal" class="modal">
+        <div class="modal-content" style="max-width: 800px; max-height: 80vh; overflow-y: auto;">
+            <div class="modal-header">Certificate Content</div>
+            <button class="btn-secondary" style="position: absolute; top: 15px; right: 15px; width: auto; padding: 5px 10px;" onclick="closeCertificateModal()">✕</button>
+            <div id="certificate-content" style="background-color: #f5f5f5; padding: 15px; border-radius: 4px; border: 1px solid #ddd; font-family: monospace; white-space: pre-wrap; word-break: break-all; line-height: 1.4; font-size: 12px; max-height: 60vh; overflow-y: auto;">
+            </div>
+            <div class="modal-footer" style="margin-top: 20px;">
+                <button class="btn-secondary" onclick="closeCertificateModal()">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Register Server to Global Server Modal -->
+    <div id="register-server-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">Register Security Server to Global Server</div>
+            <div id="register-server-alert"></div>
+            
+            <div class="form-group">
+                <label for="register_global_server_url">Global Server URL (Required):</label>
+                <input type="text" id="register_global_server_url" placeholder="http://global-server.example.com:8080">
+            </div>
+
+            <div class="form-group">
+                <label for="register_global_server_api_key">API Key (If Required):</label>
+                <input type="password" id="register_global_server_api_key" placeholder="Leave empty if not required">
+            </div>
+
+            <div class="form-group">
+                <label for="register_server_description">Description:</label>
+                <textarea id="register_server_description" placeholder="Describe this security server registration" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; min-height: 80px;"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label><input type="checkbox" id="register_include_certificate" checked> Include Digital Signature Certificate</label>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeRegisterModal()">Cancel</button>
+                <button class="btn-success" onclick="registerServerToGlobal()">Register</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Client Service Registry Modal -->
+    <div id="client-service-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="client-service-modal-title">Add Client Service</div>
+            <div id="client-service-modal-alert"></div>
+            
+            <!-- Security Server Section -->
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                <h4 style="margin-top: 0; color: #2c3e50;">🌐 Security Server Information</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="client_ss_id">Security Server ID (Required):</label>
+                        <input type="text" id="client_ss_id" placeholder="SECURITY_SERVER_1">
+                    </div>
+                    <div class="form-group">
+                        <label for="client_ss_name">Server Name:</label>
+                        <input type="text" id="client_ss_name" placeholder="Security Server 1">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="client_ss_hostname">Hostname:</label>
+                        <input type="text" id="client_ss_hostname" placeholder="server1.example.com">
+                    </div>
+                    <div class="form-group">
+                        <label for="client_ss_ip">IP Address:</label>
+                        <input type="text" id="client_ss_ip" placeholder="192.168.1.1">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="client_ss_port">Port:</label>
+                        <input type="number" id="client_ss_port" placeholder="8080">
+                    </div>
+                    <div class="form-group">
+                        <label for="client_ss_environment">Environment:</label>
+                        <select id="client_ss_environment">
+                            <option value="">-- Select --</option>
+                            <option value="DEV">DEV</option>
+                            <option value="TEST">TEST</option>
+                            <option value="PROD">PROD</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Entity Section -->
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                <h4 style="margin-top: 0; color: #2c3e50;">🏢 Entity / Owner Information</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="client_entity_code">Entity Code:</label>
+                        <input type="text" id="client_entity_code" placeholder="ENTITY_001">
+                    </div>
+                    <div class="form-group">
+                        <label for="client_entity_name">Entity Name:</label>
+                        <input type="text" id="client_entity_name" placeholder="Entity Organization">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Application Section -->
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                <h4 style="margin-top: 0; color: #2c3e50;">🧩 Application Information</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="client_app_code">Application Code:</label>
+                        <input type="text" id="client_app_code" placeholder="APP_001">
+                    </div>
+                    <div class="form-group">
+                        <label for="client_app_name">Application Name:</label>
+                        <input type="text" id="client_app_name" placeholder="Application Name">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Section -->
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                <h4 style="margin-top: 0; color: #2c3e50;">🔌 Service Information</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="client_service_code">Service Code (Required):</label>
+                        <input type="text" id="client_service_code" placeholder="SVC_001">
+                    </div>
+                    <div class="form-group">
+                        <label for="client_service_name">Service Name:</label>
+                        <input type="text" id="client_service_name" placeholder="Service Name">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="client_service_type">Service Type:</label>
+                        <select id="client_service_type">
+                            <option value="REST">REST</option>
+                            <option value="SOAP">SOAP</option>
+                            <option value="X-ROAD">X-ROAD</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="client_method">HTTP Method:</label>
+                        <select id="client_method">
+                            <option value="GET">GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="client_endpoint_path">Endpoint Path:</label>
+                    <input type="text" id="client_endpoint_path" placeholder="/api/users">
+                </div>
+                <div class="form-group">
+                    <label for="client_full_url">Full URL (Required):</label>
+                    <input type="text" id="client_full_url" placeholder="http://example.com/api/users">
+                </div>
+                <div class="form-group">
+                    <label for="client_api_version">API Version:</label>
+                    <input type="text" id="client_api_version" value="v1.0" placeholder="v1.0">
+                </div>
+            </div>
+
+            <!-- Security Section -->
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                <h4 style="margin-top: 0; color: #2c3e50;">🔐 Security Information</h4>
+                <div class="form-group">
+                    <label><input type="checkbox" id="client_tls_enabled" checked> TLS Enabled</label>
+                </div>
+                <div class="form-group">
+                    <label for="client_certificate">Certificate (Public Cert of Remote Server):</label>
+                    <textarea id="client_certificate" placeholder="Paste certificate content here" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; min-height: 60px;"></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="client_certificate_expiry">Certificate Expiry:</label>
+                    <input type="datetime-local" id="client_certificate_expiry">
+                </div>
+            </div>
+
+            <!-- Reliability Section -->
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                <h4 style="margin-top: 0; color: #2c3e50;">🔁 Routing & Reliability</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="client_timeout">Timeout (seconds):</label>
+                        <input type="number" id="client_timeout" value="30" placeholder="30">
+                    </div>
+                    <div class="form-group">
+                        <label for="client_retry">Retry Count:</label>
+                        <input type="number" id="client_retry" value="3" placeholder="3">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status & Sync Section -->
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin-bottom: 20px;">
+                <h4 style="margin-top: 0; color: #2c3e50;">📡 Status & Sync</h4>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="client_status">Status:</label>
+                        <select id="client_status">
+                            <option value="ACTIVE">ACTIVE</option>
+                            <option value="INACTIVE">INACTIVE</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="client_source">Source:</label>
+                        <select id="client_source">
+                            <option value="MANUAL">MANUAL</option>
+                            <option value="GLOBAL_SERVER">GLOBAL_SERVER</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="client_last_synced">Last Synced At:</label>
+                    <input type="datetime-local" id="client_last_synced">
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeClientServiceModal()">Cancel</button>
+                <button class="btn-success" id="client-service-modal-save-btn" onclick="saveClientService()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Sync from Global Server Modal -->
+    <div id="sync-global-modal" class="modal">
+        <div class="modal-content" style="max-width: 480px;">
+            <div class="modal-header">Sync Services from Global Server</div>
+            <div id="sync-global-alert"></div>
+            <div class="form-group" style="margin-top: 16px;">
+                <label for="sync_global_url">Global Server URL:</label>
+                <input type="text" id="sync_global_url" placeholder="e.g., http://localhost:9000" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                <small style="color: #666;">The base URL of the Global Server (without trailing slash)</small>
+            </div>
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeSyncGlobalModal()">Cancel</button>
+                <button class="btn-success" id="sync-global-btn" onclick="syncFromGlobalServer()" style="background-color: #27ae60;">⟳ Sync Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Server Configuration Modal -->
+    <div id="global-server-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header" id="global-server-modal-title">Add Global Server Configuration</div>
+            <p>hello</p>
+            <div id="global-server-modal-alert"></div>
+            
+            <div class="form-group">
+                <label for="gs_server_name">Server Name:</label>
+                <input type="text" id="gs_server_name" placeholder="e.g., GlobalServer1">
+            </div>
+
+            <div class="form-group">
+                <label for="gs_server_url">Server URL:</label>
+                <input type="text" id="gs_server_url" placeholder="e.g., https://global-server.com">
+            </div>
+
+            <div class="form-group">
+                <label for="gs_api_key">API Key:</label>
+                <input type="password" id="gs_api_key" placeholder="Enter API Key">
+            </div>
+
+            <div class="form-group">
+                <label for="gs_description">Description:</label>
+                <textarea id="gs_description" rows="4" placeholder="Description of the global server"></textarea>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeGlobalServerModal()">Cancel</button>
+                <button class="btn-success" id="global-server-modal-save-btn" onclick="saveGlobalServerConfig()">Save</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Server Registration Modal -->
+    <div id="global-server-registration-modal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">🌐 Security Server Global Registration</div>
+            <div id="global-registration-alert"></div>
+            
+            <div class="form-group">
+                <label for="reg_security_server">Select Security Server:</label>
+                <select id="reg_security_server" onchange="populateSecurityServerDetails()">
+                    <option value="">-- Select Security Server --</option>
+                </select>
+            </div>
+
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 20px 0;">
+                <h4 style="color: #2c3e50; margin-bottom: 15px;">Security Server Details</h4>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Server ID:</label>
+                        <input type="text" id="reg_server_id" readonly style="background-color: #e8e8e8;">
+                    </div>
+                    <div class="form-group">
+                        <label>Server Name:</label>
+                        <input type="text" id="reg_server_name" readonly style="background-color: #e8e8e8;">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Address:</label>
+                        <input type="text" id="reg_address" readonly style="background-color: #e8e8e8;">
+                    </div>
+                    <div class="form-group">
+                        <label>Port:</label>
+                        <input type="text" id="reg_port" readonly style="background-color: #e8e8e8;">
+                    </div>
+                </div>
+            </div>
+
+            <div style="background-color: #f8f9fa; padding: 15px; border-radius: 4px; margin: 20px 0;">
+                <h4 style="color: #2c3e50; margin-bottom: 15px;">Global Server Information</h4>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Global Server URL:</label>
+                        <input type="text" id="reg_global_server_url" readonly style="background-color: #e8e8e8;">
+                    </div>
+                    <div class="form-group">
+                        <label>Registration Status:</label>
+                        <input type="text" id="reg_status" readonly style="background-color: #e8e8e8;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="modal-footer">
+                <button class="btn-secondary" onclick="closeGlobalServerRegistrationModal()">Cancel</button>
+                <button class="btn-success" id="reg-register-btn" onclick="registerSecurityServerToGlobal()">Register to Global Server</button>
+                <button class="btn-danger" id="reg-deregister-btn" style="display: none;" onclick="deregisterSecurityServerFromGlobal()">Deregister from Global Server</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentEditingId = null;
+
+        // Sidebar toggle function
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+
+        // Tab switching functions
+        function switchMainTab(tabName) {
+            document.querySelectorAll('.main-tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.main-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        }
+
+        function switchSubTab(tabName) {
+            document.querySelectorAll('.sub-tab-content').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            document.querySelectorAll('.sub-tab-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(tabName).classList.add('active');
+            event.currentTarget.classList.add('active');
+
+            if (tabName === 'network-config') {
+                loadNetworkConfigs();
+            } else if (tabName === 'digital-signature') {
+                loadEntitySelectDropdown();
+                listSignatureCertificates();
+            } else if (tabName === 'my-applications') {
+                loadApplications();
+            } else if (tabName === 'my-services-list') {
+                loadServices();
+            } else if (tabName === 'global-server-config') {
+                loadGlobalServerConfigs();
+            }
+        }
+
+        // DB Configuration functions
+        function showAlert(elementId, message, type) {
+            const alertDiv = document.getElementById(elementId);
+            alertDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            setTimeout(() => {
+                alertDiv.innerHTML = '';
+            }, 5000);
+        }
+
+        async function testDBConnection() {
+            const config = {
+                host: document.getElementById('db_host').value,
+                port: parseInt(document.getElementById('db_port').value),
+                user: document.getElementById('db_user').value,
+                password: document.getElementById('db_password').value,
+                database: document.getElementById('db_name').value
+            };
+
+            if (!config.host || !config.user || !config.database) {
+                showAlert('db-alert', 'Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/db/test-connection', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('db-alert', 'Database connection successful!', 'success');
+                } else {
+                    showAlert('db-alert', `Connection failed: ${data.detail}`, 'error');
+                }
+            } catch (error) {
+                showAlert('db-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function saveDBConfig() {
+            const config = {
+                host: document.getElementById('db_host').value,
+                port: parseInt(document.getElementById('db_port').value),
+                user: document.getElementById('db_user').value,
+                password: document.getElementById('db_password').value,
+                database: document.getElementById('db_name').value
+            };
+
+            if (!config.host || !config.user || !config.database) {
+                showAlert('db-alert', 'Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/db/save-config', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('db-alert', 'Configuration saved successfully!', 'success');
+                    updateCurrentDBConfig(config);
+                } else {
+                    showAlert('db-alert', `Save failed: ${data.detail}`, 'error');
+                }
+            } catch (error) {
+                showAlert('db-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        function updateCurrentDBConfig(config) {
+            const display = document.getElementById('current-db-config');
+            display.innerHTML = `
+                Host: ${config.host}<br>
+                Port: ${config.port}<br>
+                User: ${config.user}<br>
+                Database: ${config.database}
+            `;
+        }
+
+        async function loadCurrentDBConfig() {
+            try {
+                const response = await fetch('/api/db/get-config');
+                if (response.ok) {
+                    const config = await response.json();
+                    document.getElementById('db_host').value = config.host || '';
+                    document.getElementById('db_port').value = config.port || 3306;
+                    document.getElementById('db_user').value = config.user || '';
+                    document.getElementById('db_name').value = config.database || '';
+                    updateCurrentDBConfig(config);
+                }
+            } catch (error) {
+                console.log('No saved config found');
+            }
+        }
+
+        // Network Configuration functions
+        function showAddNetworkForm() {
+            currentEditingId = null;
+            document.getElementById('modal-title').textContent = 'Add Network Configuration';
+            document.getElementById('modal-save-btn').textContent = 'Save';
+            document.getElementById('modal-alert').innerHTML = '';
+            document.getElementById('net_id').disabled = false;
+            document.getElementById('net_id').value = '';
+            document.getElementById('net_title').value = '';
+            document.getElementById('net_version').value = '';
+            document.getElementById('net_network_instance').value = '';
+            document.getElementById('net_gateway_code').value = '';
+            document.getElementById('net_entity_id').value = '';
+            document.getElementById('net_host').value = '';
+            document.getElementById('net_port').value = '';
+            document.getElementById('net_hostname').value = '';
+            document.getElementById('net_ip_address').value = '';
+            document.getElementById('net_environment').value = 'PROD';
+            document.getElementById('network-modal').classList.add('active');
+        }
+
+        function closeNetworkModal() {
+            document.getElementById('network-modal').classList.remove('active');
+            currentEditingId = null;
+        }
+
+        async function saveNetworkConfig() {
+            const config = {
+                id: document.getElementById('net_id').value,
+                title: document.getElementById('net_title').value,
+                version: document.getElementById('net_version').value,
+                network_instance: document.getElementById('net_network_instance').value,
+                gateway_code: document.getElementById('net_gateway_code').value,
+                entity_id: parseInt(document.getElementById('net_entity_id').value) || null,
+                host: document.getElementById('net_host').value,
+                port: parseInt(document.getElementById('net_port').value) || null,
+                hostname: document.getElementById('net_hostname').value,
+                ip_address: document.getElementById('net_ip_address').value,
+                environment: document.getElementById('net_environment').value
+            };
+
+            if (!config.id || !config.title || !config.host) {
+                showAlert('modal-alert', 'Please fill in all required fields (ID, Title, Host)', 'error');
+                return;
+            }
+
+            try {
+                const method = currentEditingId ? 'PUT' : 'POST';
+                const url = currentEditingId ? `/api/network/${currentEditingId}` : '/api/network';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(config)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('modal-alert', currentEditingId ? 'Configuration updated successfully!' : 'Configuration created successfully!', 'success');
+                    setTimeout(() => {
+                        closeNetworkModal();
+                        loadNetworkConfigs();
+                    }, 1500);
+                } else {
+                    showAlert('modal-alert', `Save failed: ${data.detail}`, 'error');
+                }
+            } catch (error) {
+                showAlert('modal-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadNetworkConfigs() {
+            try {
+                const response = await fetch('/api/network');
+                if (response.ok) {
+                    const configs = await response.json();
+                    renderNetworkTable(configs);
+                } else {
+                    showAlert('network-alert', 'Failed to load configurations', 'error');
+                }
+            } catch (error) {
+                showAlert('network-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        function renderNetworkTable(configs) {
+            const tbody = document.getElementById('network-table-body');
+            if (configs.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: #999;">No configurations found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = configs.map(config => `
+                <tr>
+                    <td>${config.id}</td>
+                    <td>${config.title}</td>
+                    <td>${config.host}</td>
+                    <td>${config.port || '-'}</td>
+                    <td>${config.ip_address || '-'}</td>
+                    <td><span class="status-badge ${config.environment === 'PROD' ? 'status-info' : 'status-success'}">${config.environment}</span></td>
+                    <td>${new Date(config.created_at).toLocaleString()}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-primary btn-sm" onclick="editNetworkConfig('${config.id}')">Edit</button>
+                            <button class="btn-danger btn-sm" onclick="deleteNetworkConfig('${config.id}')">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function editNetworkConfig(id) {
+            try {
+                const response = await fetch(`/api/network/${id}`);
+                if (response.ok) {
+                    const config = await response.json();
+                    currentEditingId = id;
+                    document.getElementById('modal-title').textContent = 'Edit Network Configuration';
+                    document.getElementById('modal-save-btn').textContent = 'Update';
+                    document.getElementById('modal-alert').innerHTML = '';
+
+                    document.getElementById('net_id').value = config.id;
+                    document.getElementById('net_id').disabled = true;
+                    document.getElementById('net_title').value = config.title;
+                    document.getElementById('net_version').value = config.version || '';
+                    document.getElementById('net_network_instance').value = config.network_instance || '';
+                    document.getElementById('net_gateway_code').value = config.gateway_code || '';
+                    document.getElementById('net_entity_id').value = config.entity_id || '';
+                    document.getElementById('net_host').value = config.host;
+                    document.getElementById('net_port').value = config.port || '';
+                    document.getElementById('net_hostname').value = config.hostname || '';
+                    document.getElementById('net_ip_address').value = config.ip_address || '';
+                    document.getElementById('net_environment').value = config.environment;
+
+                    document.getElementById('network-modal').classList.add('active');
+                } else {
+                    showAlert('network-alert', 'Failed to load configuration', 'error');
+                }
+            } catch (error) {
+                showAlert('network-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteNetworkConfig(id) {
+            if (!confirm(`Are you sure you want to delete configuration "${id}"?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/network/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showAlert('network-alert', 'Configuration deleted successfully!', 'success');
+                    loadNetworkConfigs();
+                } else {
+                    showAlert('network-alert', 'Failed to delete configuration', 'error');
+                }
+            } catch (error) {
+                showAlert('network-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Global Server Registration Functions
+        async function showGlobalServerRegistrationModal() {
+            try {
+                // Load network configurations to populate dropdown
+                const networkResponse = await fetch('/api/network');
+                if (networkResponse.ok) {
+                    const configs = await networkResponse.json();
+                    const dropdown = document.getElementById('reg_security_server');
+                    dropdown.innerHTML = '<option value="">-- Select Security Server --</option>';
+                    
+                    configs.forEach(config => {
+                        const option = document.createElement('option');
+                        option.value = JSON.stringify(config);
+                        option.textContent = `${config.id} - ${config.title}`;
+                        dropdown.appendChild(option);
+                    });
+                }
+                
+                // Load global server configuration
+                const globalResponse = await fetch('/api/global-server');
+                if (globalResponse.ok) {
+                    const globalConfigs = await globalResponse.json();
+                    if (globalConfigs.length > 0) {
+                        const globalConfig = globalConfigs[0];
+                        document.getElementById('reg_global_server_url').value = globalConfig.server_url;
+                    }
+                }
+                
+                document.getElementById('global-server-registration-modal').classList.add('active');
+            } catch (error) {
+                showAlert('global-registration-alert', `Error loading data: ${error.message}`, 'error');
+            }
+        }
+
+        function closeGlobalServerRegistrationModal() {
+            document.getElementById('global-server-registration-modal').classList.remove('active');
+            // Reset form
+            document.getElementById('reg_security_server').value = '';
+            document.getElementById('reg_server_id').value = '';
+            document.getElementById('reg_server_name').value = '';
+            document.getElementById('reg_address').value = '';
+            document.getElementById('reg_port').value = '';
+            document.getElementById('reg_status').value = '';
+        }
+
+        function populateSecurityServerDetails() {
+            const selectedValue = document.getElementById('reg_security_server').value;
+            if (!selectedValue) {
+                document.getElementById('reg_server_id').value = '';
+                document.getElementById('reg_server_name').value = '';
+                document.getElementById('reg_address').value = '';
+                document.getElementById('reg_port').value = '';
+                document.getElementById('reg_status').value = '';
+                document.getElementById('reg-register-btn').style.display = 'block';
+                document.getElementById('reg-deregister-btn').style.display = 'none';
+                return;
+            }
+
+            const config = JSON.parse(selectedValue);
+            document.getElementById('reg_server_id').value = config.id;
+            document.getElementById('reg_server_name').value = config.title;
+            document.getElementById('reg_address').value = config.ip_address || config.host;
+            document.getElementById('reg_port').value = config.port;
+            document.getElementById('reg_status').value = 'Ready to Register';
+            
+            // Show Register button (you can add logic to check registration status from API if needed)
+            document.getElementById('reg-register-btn').style.display = 'block';
+            document.getElementById('reg-deregister-btn').style.display = 'none';
+        }
+
+        async function registerSecurityServerToGlobal() {
+            const serverId = document.getElementById('reg_server_id').value.trim();
+            const globalServerUrl = document.getElementById('reg_global_server_url').value.trim();
+
+            if (!serverId || !globalServerUrl) {
+                showAlert('global-registration-alert', 'Please select a security server and ensure global server is configured', 'error');
+                return;
+            }
+
+            try {
+                // Prepare registration payload
+                const registrationPayload = {
+                    registration_id: `REG_${serverId}_${Date.now()}`,
+                    server_id: serverId,
+                    server_name: document.getElementById('reg_server_name').value,
+                    organization: "My Organization",
+                    address: document.getElementById('reg_address').value,
+                    port: parseInt(document.getElementById('reg_port').value),
+                    network_instance: "EE",
+                    auth_csr: "-----BEGIN CERTIFICATE REQUEST-----\n...\n-----END CERTIFICATE REQUEST-----",
+                    auth_crt: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
+                    auth_certificate_id: "550e8400-e29b-41d4-a716-446655440000",
+                    auth_thumbprint: "SHA256:3B6A9E2D4C1F7A8B5E9D2C4F1A7B8E9D",
+                    auth_expiry_date: new Date(new Date().getTime() + 365*24*60*60*1000).toISOString(),
+                    sign_csr: "-----BEGIN CERTIFICATE REQUEST-----\n...\n-----END CERTIFICATE REQUEST-----",
+                    sign_crt: "-----BEGIN CERTIFICATE-----\n...\n-----END CERTIFICATE-----",
+                    sign_certificate_id: "660e8400-e29b-41d4-a716-446655440001",
+                    sign_thumbprint: "SHA256:4C7B0F9E3D2A8B1F6E5C3D2A1F8B9E7D",
+                    sign_expiry_date: new Date(new Date().getTime() + 365*24*60*60*1000).toISOString(),
+                    created_by: "admin@organization.com"
+                };
+
+                // Construct the full registration endpoint URL
+                const registrationUrl = `${globalServerUrl.replace(/\/$/, '')}/api/security-servers/register`;
+
+                // Send registration request to global server
+                const response = await fetch(registrationUrl, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(registrationPayload)
+                });
+
+                if (response.ok) {
+                    showAlert('global-registration-alert', '✅ Security server registered to global server successfully!', 'success');
+                    document.getElementById('reg_status').value = 'Registered';
+                    document.getElementById('reg-register-btn').style.display = 'none';
+                    document.getElementById('reg-deregister-btn').style.display = 'block';
+                    setTimeout(() => closeGlobalServerRegistrationModal(), 2000);
+                } else {
+                    const errorData = await response.json();
+                    showAlert('global-registration-alert', `Registration failed: ${errorData.detail || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showAlert('global-registration-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function deregisterSecurityServerFromGlobal() {
+            const serverId = document.getElementById('reg_server_id').value.trim();
+            const globalServerUrl = document.getElementById('reg_global_server_url').value.trim();
+
+            if (!serverId || !globalServerUrl) {
+                showAlert('global-registration-alert', 'Server information missing', 'error');
+                return;
+            }
+
+            if (!confirm(`Are you sure you want to deregister "${serverId}" from the global server?`)) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${globalServerUrl}/api/security-servers/${serverId}/deregister`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' }
+                });
+
+                if (response.ok) {
+                    showAlert('global-registration-alert', '✅ Security server deregistered from global server successfully!', 'success');
+                    document.getElementById('reg_status').value = 'Deregistered';
+                    document.getElementById('reg-register-btn').style.display = 'block';
+                    document.getElementById('reg-deregister-btn').style.display = 'none';
+                    setTimeout(() => closeGlobalServerRegistrationModal(), 2000);
+                } else {
+                    const errorData = await response.json();
+                    showAlert('global-registration-alert', `Deregistration failed: ${errorData.detail || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showAlert('global-registration-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Owner Organisation Functions
+        let currentEditingOwnerId = null;
+
+        function showAddOwnerForm() {
+            currentEditingOwnerId = null;
+            document.getElementById('owner-modal-title').textContent = 'Add Organisation';
+            document.getElementById('owner-modal-save-btn').textContent = 'Save';
+            document.getElementById('owner-modal-alert').innerHTML = '';
+            document.getElementById('owner_code').disabled = false;
+            document.getElementById('owner_code').value = '';
+            document.getElementById('owner_name').value = '';
+            document.getElementById('owner_contact').value = '';
+            document.getElementById('owner_email').value = '';
+            document.getElementById('owner_phone').value = '';
+            document.getElementById('owner_country').value = '';
+            document.getElementById('owner_state').value = '';
+            document.getElementById('owner_city').value = '';
+            document.getElementById('owner_address').value = '';
+            document.getElementById('owner-modal').classList.add('active');
+        }
+
+        function closeOwnerModal() {
+            document.getElementById('owner-modal').classList.remove('active');
+            currentEditingOwnerId = null;
+        }
+
+        async function saveOwnerOrganisation() {
+            const owner = {
+                entity_code: document.getElementById('owner_code').value,
+                entity_name: document.getElementById('owner_name').value,
+                contact_person: document.getElementById('owner_contact').value,
+                email: document.getElementById('owner_email').value,
+                phone: document.getElementById('owner_phone').value,
+                country: document.getElementById('owner_country').value,
+                state: document.getElementById('owner_state').value,
+                city: document.getElementById('owner_city').value,
+                address: document.getElementById('owner_address').value
+            };
+
+            if (!owner.entity_code || !owner.entity_name) {
+                showAlert('owner-modal-alert', 'Please fill in required fields (Entity Code, Entity Name)', 'error');
+                return;
+            }
+
+            try {
+                const method = currentEditingOwnerId ? 'PUT' : 'POST';
+                const url = currentEditingOwnerId ? `/api/entity/${currentEditingOwnerId}` : '/api/entity';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(owner)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('owner-modal-alert', currentEditingOwnerId ? 'Organisation updated successfully!' : 'Organisation created successfully!', 'success');
+                    setTimeout(() => {
+                        closeOwnerModal();
+                        loadOwnerOrganisations();
+                    }, 1500);
+                } else {
+                    showAlert('owner-modal-alert', `Save failed: ${data.detail}`, 'error');
+                }
+            } catch (error) {
+                showAlert('owner-modal-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadOwnerOrganisations() {
+            try {
+                const response = await fetch('/api/entity');
+                if (response.ok) {
+                    const owners = await response.json();
+                    renderOwnerTable(owners);
+                } else {
+                    showAlert('owner-alert', 'Failed to load organisations', 'error');
+                }
+            } catch (error) {
+                showAlert('owner-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        function renderOwnerTable(owners) {
+            const tbody = document.getElementById('owner-table-body');
+            if (owners.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #999;">No organisations found</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = owners.map(owner => `
+                <tr>
+                    <td>${owner.entity_code}</td>
+                    <td>${owner.entity_name}</td>
+                    <td>${owner.contact_person || '-'}</td>
+                    <td>${owner.email || '-'}</td>
+                    <td>${owner.phone || '-'}</td>
+                    <td>${owner.city || '-'}</td>
+                    <td>${owner.country || '-'}</td>
+                    <td>${new Date(owner.created_at).toLocaleString()}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-primary btn-sm" onclick="editOwnerOrganisation(${owner.id})">Edit</button>
+                            <button class="btn-danger btn-sm" onclick="deleteOwnerOrganisation(${owner.id})">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function editOwnerOrganisation(id) {
+            try {
+                const response = await fetch(`/api/entity/${id}`);
+                if (response.ok) {
+                    const owner = await response.json();
+                    currentEditingOwnerId = id;
+                    document.getElementById('owner-modal-title').textContent = 'Edit Organisation';
+                    document.getElementById('owner-modal-save-btn').textContent = 'Update';
+                    document.getElementById('owner-modal-alert').innerHTML = '';
+
+                    document.getElementById('owner_code').value = owner.entity_code;
+                    document.getElementById('owner_code').disabled = true;
+                    document.getElementById('owner_name').value = owner.entity_name;
+                    document.getElementById('owner_contact').value = owner.contact_person || '';
+                    document.getElementById('owner_email').value = owner.email || '';
+                    document.getElementById('owner_phone').value = owner.phone || '';
+                    document.getElementById('owner_country').value = owner.country || '';
+                    document.getElementById('owner_state').value = owner.state || '';
+                    document.getElementById('owner_city').value = owner.city || '';
+                    document.getElementById('owner_address').value = owner.address || '';
+
+                    document.getElementById('owner-modal').classList.add('active');
+                } else {
+                    showAlert('owner-alert', 'Failed to load organisation', 'error');
+                }
+            } catch (error) {
+                showAlert('owner-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteOwnerOrganisation(id) {
+            if (!confirm('Are you sure you want to delete this organisation?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`/api/entity/${id}`, { method: 'DELETE' });
+                if (response.ok) {
+                    showAlert('owner-alert', 'Organisation deleted successfully!', 'success');
+                    loadOwnerOrganisations();
+                } else {
+                    showAlert('owner-alert', 'Failed to delete organisation', 'error');
+                }
+            } catch (error) {
+                showAlert('owner-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // ===== Digital Signature Certificate Functions =====
+
+        async function loadEntitySelectDropdown() {
+            // Load organisations into the entity select dropdown
+            try {
+                const response = await fetch('/api/entity');
+                if (response.ok) {
+                    const entities = await response.json();
+                    const select = document.getElementById('sig_entity_select');
+                    select.innerHTML = '<option value="">-- Select Organization --</option>';
+                    
+                    entities.forEach(entity => {
+                        const option = document.createElement('option');
+                        option.value = JSON.stringify(entity);
+                        option.text = `${entity.entity_code} - ${entity.entity_name}`;
+                        select.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                showAlert('signature-alert', `Error loading organisations: ${error.message}`, 'error');
+            }
+        }
+
+        function populateSignatureFormFromEntity() {
+            const selectElement = document.getElementById('sig_entity_select');
+            const selectedValue = selectElement.value;
+            
+            if (!selectedValue) {
+                clearSignatureForm();
+                return;
+            }
+            
+            try {
+                const entity = JSON.parse(selectedValue);
+                
+                document.getElementById('sig_entity_code').value = entity.entity_code || '';
+                document.getElementById('sig_entity_name').value = entity.entity_name || '';
+                document.getElementById('sig_contact_person').value = entity.contact_person || '';
+                document.getElementById('sig_email').value = entity.email || '';
+                document.getElementById('sig_phone').value = entity.phone || '';
+                document.getElementById('sig_city').value = entity.city || '';
+                document.getElementById('sig_state').value = entity.state || '';
+                document.getElementById('sig_country').value = entity.country ? entity.country.substring(0, 2).toUpperCase() : '';
+                
+            } catch (error) {
+                showAlert('signature-alert', 'Error parsing entity data', 'error');
+            }
+        }
+
+        function clearSignatureForm() {
+            document.getElementById('sig_entity_select').value = '';
+            document.getElementById('sig_entity_code').value = '';
+            document.getElementById('sig_entity_name').value = '';
+            document.getElementById('sig_contact_person').value = '';
+            document.getElementById('sig_email').value = '';
+            document.getElementById('sig_phone').value = '';
+            document.getElementById('sig_city').value = '';
+            document.getElementById('sig_state').value = '';
+            document.getElementById('sig_country').value = '';
+            document.getElementById('sig_password').value = '';
+            document.getElementById('signature-files-list').innerHTML = '';
+        }
+
+        async function generateSignatureCertificate() {
+            const entityCode = document.getElementById('sig_entity_code').value;
+            const entityName = document.getElementById('sig_entity_name').value;
+            const contactPerson = document.getElementById('sig_contact_person').value;
+            const email = document.getElementById('sig_email').value;
+            const phone = document.getElementById('sig_phone').value;
+            const city = document.getElementById('sig_city').value;
+            const state = document.getElementById('sig_state').value;
+            const country = document.getElementById('sig_country').value;
+            const password = document.getElementById('sig_password').value || null;
+
+            // Validation
+            if (!entityCode || !entityName || !email || !city || !state || !country) {
+                showAlert('signature-alert', 'Please fill in all required fields', 'error');
+                return;
+            }
+
+            if (country.length !== 2) {
+                showAlert('signature-alert', 'Country must be a 2-letter code (e.g., US, IN, GB)', 'error');
+                return;
+            }
+
+            try {
+                const certRequest = {
+                    entity_code: entityCode,
+                    entity_name: entityName,
+                    contact_person: contactPerson,
+                    email: email,
+                    phone: phone,
+                    city: city,
+                    state: state,
+                    country: country,
+                    certificate_type: 'signature',
+                    password: password
+                };
+
+                showAlert('signature-alert', 'Generating certificate... This may take a moment.', 'info');
+
+                const response = await fetch('/api/certificate/generate', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(certRequest)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('signature-alert', '✅ Digital signature certificate generated successfully!', 'success');
+                    displayCertificateFiles(data);
+                    
+                    // Reload available certificates
+                    setTimeout(() => {
+                        loadSignatureCertificates();
+                    }, 1000);
+                } else {
+                    showAlert('signature-alert', `Generation failed: ${data.detail}`, 'error');
+                }
+            } catch (error) {
+                showAlert('signature-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        function displayCertificateFiles(result) {
+            const filesList = document.getElementById('signature-files-list');
+            
+            let html = `
+                <div style="background-color: #d4edda; border: 1px solid #c3e6cb; border-radius: 4px; padding: 15px;">
+                    <h4 style="color: #155724; margin-bottom: 10px;">✅ Certificate Generated Successfully</h4>
+                    <p style="color: #155724; margin-bottom: 15px;"><strong>Entity Code:</strong> ${result.entity_code}</p>
+                    <h5 style="color: #155724; margin-bottom: 10px;">Generated Files:</h5>
+                    <ul style="margin-left: 20px; color: #155724;">
+            `;
+            
+            if (result.files) {
+                for (const [fileType, filePath] of Object.entries(result.files)) {
+                    const fileName = filePath.split('/').pop();
+                    html += `
+                        <li style="margin-bottom: 8px;">
+                            <strong>${fileType.replace('_', ' ')}:</strong> ${fileName}
+                            <a href="/api/certificate/download/signature/${fileName}" 
+                               style="margin-left: 10px; color: #0066cc; text-decoration: none; font-weight: bold;" 
+                               download>
+                               📥 Download
+                            </a>
+                        </li>
+                    `;
+                }
+            }
+            
+            html += `
+                    </ul>
+                    <p style="color: #155724; margin-top: 15px; font-size: 12px;">
+                        💾 Files are stored in: certificates/digital_signature/
+                    </p>
+                </div>
+            `;
+            
+            filesList.innerHTML = html;
+        }
+
+        async function listSignatureCertificates() {
+            // Load and display list of generated signature certificates
+            try {
+                const filesList = document.getElementById('signature-files-list');
+                filesList.innerHTML = '<div class="loading"><div class="spinner"></div>Loading certificates...</div>';
+                
+                // Get list of all signature certificates from the certificates directory
+                // We'll fetch by checking if files exist
+                const response = await fetch('/api/certificate/list/signature');
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    if (data.files && data.files.length > 0) {
+                        let html = '<div style="margin-top: 20px;"><h4 style="color: #2c3e50; margin-bottom: 15px;">🔐 Generated Signature Certificates:</h4>';
+                        html += '<div class="table-container"><table style="width: 100%; border-collapse: collapse;">';
+                        html += '<thead><tr style="background-color: #34495e; color: white;"><th style="padding: 10px; text-align: left;">Filename</th><th style="padding: 10px; text-align: left;">Size (KB)</th><th style="padding: 10px; text-align: center;">Action</th></tr></thead>';
+                        html += '<tbody>';
+                        
+                        data.files.forEach(file => {
+                            const sizeKB = (file.size / 1024).toFixed(2);
+                            html += `<tr style="border-bottom: 1px solid #ddd;">
+                                <td style="padding: 10px;">${file.filename}</td>
+                                <td style="padding: 10px;">${sizeKB} KB</td>
+                                <td style="padding: 10px; text-align: center;">
+                                    <button class="btn-primary btn-sm" onclick="viewCertificateFile('signature', '${file.filename}')" style="padding: 5px 10px; font-size: 12px;">👁️ View</button>
+                                </td>
+                            </tr>`;
+                        });
+                        
+                        html += '</tbody></table></div></div>';
+                        filesList.innerHTML = html;
+                        showAlert('signature-alert', `Found ${data.files.length} certificate file(s)`, 'success');
+                    } else {
+                        filesList.innerHTML = '<div style="margin-top: 20px; padding: 20px; background-color: #f9f9f9; border-radius: 4px; text-align: center; color: #7f8c8d;">No signature certificates found. Generate one to get started!</div>';
+                        showAlert('signature-alert', 'No certificates generated yet', 'info');
+                    }
+                } else {
+                    filesList.innerHTML = '<div style="margin-top: 20px; padding: 20px; background-color: #f9f9f9; border-radius: 4px; text-align: center; color: #7f8c8d;">No certificates available yet</div>';
+                    showAlert('signature-alert', 'No certificates found', 'info');
+                }
+            } catch (error) {
+                const filesList = document.getElementById('signature-files-list');
+                filesList.innerHTML = '<div style="margin-top: 20px; padding: 20px; background-color: #f9f9f9; border-radius: 4px; text-align: center; color: #e74c3c;">Error loading certificates</div>';
+                showAlert('signature-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function viewCertificateFile(certType, filename) {
+            // View a specific certificate file in a new tab
+            try {
+                const url = `/api/certificate/download/${certType}/${filename}`;
+                window.open(url, '_blank');
+                showAlert('signature-alert', `Opening: ${filename}`, 'success');
+            } catch (error) {
+                showAlert('signature-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function downloadCertificateFile(certType, filename) {
+            // Download a specific certificate file
+            try {
+                const response = await fetch(`/api/certificate/download/${certType}/${filename}`);
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                    document.body.removeChild(a);
+                    showAlert('signature-alert', `Downloaded: ${filename}`, 'success');
+                } else {
+                    showAlert('signature-alert', 'Failed to download file', 'error');
+                }
+            } catch (error) {
+                showAlert('signature-alert', `Error downloading: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadSignatureCertificates() {
+            // Load and display list of generated signature and auth certificates
+            try {
+                // Check if element exists first
+                const tbody = document.getElementById('certificates-table-body');
+                if (!tbody) {
+                    console.warn('Certificate table body element not found');
+                    return;
+                }
+
+                // Fetch both signature and auth certificates
+                const sigResponse = await fetch('/api/certificate/list/signature');
+                const authResponse = await fetch('/api/certificate/list/auth');
+                
+                let data = [];
+                
+                if (sigResponse.ok) {
+                    const sigData = await sigResponse.json();
+                    if (sigData && sigData.files && Array.isArray(sigData.files)) {
+                        data = data.concat(sigData.files.map(file => ({
+                            ...file,
+                            certificate_type: 'Digital Signature'
+                        })));
+                    }
+                }
+                
+                if (authResponse.ok) {
+                    const authData = await authResponse.json();
+                    if (authData && authData.files && Array.isArray(authData.files)) {
+                        data = data.concat(authData.files.map(file => ({
+                            ...file,
+                            certificate_type: 'Authentication'
+                        })));
+                    }
+                }
+                
+                tbody.innerHTML = '';
+
+                if (!data || data.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">No certificates generated yet</td></tr>';
+                    return;
+                }
+
+                data.forEach((cert, index) => {
+                    const sizeKB = (cert.size / 1024).toFixed(2);
+                    const modifiedDate = cert.modified ? new Date(cert.modified).toLocaleDateString() : 'N/A';
+                    
+                    const row = `
+                        <tr>
+                            <td>${cert.filename || 'N/A'}</td>
+                            <td>${cert.certificate_type || 'N/A'}</td>
+                            <td>${sizeKB} KB</td>
+                            <td>${modifiedDate}</td>
+                            <td><span style="background-color: #27ae60; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">VALID</span></td>
+                            <td>
+                                <button class="btn-small" onclick="viewCertificateContent('${cert.filename}')">View</button>
+                            </td>
+                        </tr>
+                    `;
+                    tbody.innerHTML += row;
+                });
+            } catch (error) {
+                console.error('Error loading certificates:', error);
+                const tbody = document.getElementById('certificates-table-body');
+                if (tbody) {
+                    tbody.innerHTML = '<tr><td colspan="6" style="text-align: center; color: #999;">Error loading certificates</td></tr>';
+                }
+            }
+        }
+
+        async function viewCertificateContent(filePath) {
+            try {
+                const response = await fetch(`/api/certificate/view?path=${encodeURIComponent(filePath)}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    document.getElementById('certificate-content').textContent = data.content;
+                    document.getElementById('certificate-view-modal').classList.add('active');
+                } else {
+                    showAlert('signature-alert', 'Failed to load certificate content', 'error');
+                }
+            } catch (error) {
+                showAlert('signature-alert', `Error loading certificate: ${error.message}`, 'error');
+            }
+        }
+
+        function closeCertificateModal() {
+            document.getElementById('certificate-view-modal').classList.remove('active');
+        }
+
+        function showRegisterServerModal() {
+            document.getElementById('register_global_server_url').value = '';
+            document.getElementById('register_global_server_api_key').value = '';
+            document.getElementById('register_server_description').value = '';
+            document.getElementById('register_include_certificate').checked = true;
+            document.getElementById('register-server-modal').classList.add('active');
+        }
+
+        function closeRegisterModal() {
+            document.getElementById('register-server-modal').classList.remove('active');
+        }
+
+        async function registerServerToGlobal() {
+            const globalServerUrl = document.getElementById('register_global_server_url').value;
+            const apiKey = document.getElementById('register_global_server_api_key').value;
+            const description = document.getElementById('register_server_description').value;
+            const includeCert = document.getElementById('register_include_certificate').checked;
+
+            if (!globalServerUrl) {
+                showAlert('register-server-alert', 'Please enter Global Server URL', 'error');
+                return;
+            }
+
+            try {
+                const response = await fetch('/api/register-to-global-server', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        global_server_url: globalServerUrl,
+                        api_key: apiKey || null,
+                        description: description,
+                        include_certificate: includeCert
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showAlert('register-server-alert', '✅ Security Server registered to Global Server successfully!', 'success');
+                    closeRegisterModal();
+                } else {
+                    const data = await response.json();
+                    showAlert('register-server-alert', `Registration failed: ${data.detail || 'Unknown error'}`, 'error');
+                }
+            } catch (error) {
+                showAlert('register-server-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+
+        // ===================== My Applications Management =====================
+
+        async function populateNetworkDropdown() {
+            try {
+                const response = await fetch('/api/network');
+                const networks = await response.json();
+                
+                const dropdown = document.getElementById('app_network_id');
+                // Clear existing options except the first one
+                dropdown.innerHTML = '<option value="">-- Select Gateway (Network) --</option>';
+                
+                if (networks.length > 0) {
+                    networks.forEach(network => {
+                        const option = document.createElement('option');
+                        option.value = network.id;
+                        option.textContent = `${network.id} (${network.title || 'N/A'})`;
+                        dropdown.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading networks:', error);
+            }
+        }
+
+        function showAddApplicationForm() {
+            currentEditingId = null;
+            document.getElementById('application-modal-title').textContent = 'Add Application';
+            document.getElementById('app_code').disabled = false;
+            document.getElementById('app_code').value = '';
+            document.getElementById('app_name').value = '';
+            populateNetworkDropdown();
+            document.getElementById('app_network_id').value = '';
+            document.getElementById('app_entity_id').value = '';
+            document.getElementById('app_host').value = '';
+            document.getElementById('app_port').value = '';
+            document.getElementById('app_protocol').value = 'HTTPS';
+            document.getElementById('app_version').value = '';
+            document.getElementById('app_status').value = 'PENDING';
+            document.getElementById('app_environment').value = 'DEV';
+            document.getElementById('app_admin_name').value = '';
+            document.getElementById('app_admin_email').value = '';
+            document.getElementById('app_admin_phone').value = '';
+            document.getElementById('app_description').value = '';
+            document.getElementById('application-modal').classList.add('active');
+        }
+
+        function closeApplicationModal() {
+            document.getElementById('application-modal').classList.remove('active');
+            currentEditingId = null;
+        }
+
+        async function saveApplication() {
+            const app = {
+                app_code: document.getElementById('app_code').value,
+                app_name: document.getElementById('app_name').value,
+                app_type: 'APPLICATION',
+                entity_id: document.getElementById('app_entity_id').value ? parseInt(document.getElementById('app_entity_id').value) : null,
+                network_id: document.getElementById('app_network_id').value,
+                host: document.getElementById('app_host').value,
+                port: parseInt(document.getElementById('app_port').value),
+                protocol: document.getElementById('app_protocol').value,
+                version: document.getElementById('app_version').value,
+                status: document.getElementById('app_status').value,
+                environment: document.getElementById('app_environment').value,
+                administrator: document.getElementById('app_admin_name').value,
+                admin_email: document.getElementById('app_admin_email').value,
+                admin_phone: document.getElementById('app_admin_phone').value,
+                description: document.getElementById('app_description').value
+            };
+
+            if (!app.app_code || !app.app_name || !app.network_id || !app.host || !app.port) {
+                showAlert('application-modal-alert', 'Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const method = currentEditingId ? 'PUT' : 'POST';
+                const url = currentEditingId ? `/api/my-application/${currentEditingId}` : '/api/my-application';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(app)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('application-modal-alert', currentEditingId ? 'Application updated successfully!' : 'Application created successfully!', 'success');
+                    setTimeout(() => {
+                        closeApplicationModal();
+                        loadApplications();
+                    }, 1500);
+                } else {
+                    showAlert('application-modal-alert', `Save failed: ${data.detail}`, 'error');
+                }
+            } catch (error) {
+                showAlert('application-modal-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadApplications() {
+            try {
+                const response = await fetch('/api/my-application');
+                const applications = await response.json();
+
+                const tbody = document.getElementById('application-table-body');
+                tbody.innerHTML = '';
+
+                if (applications.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #999;">No applications found</td></tr>';
+                    return;
+                }
+
+                applications.forEach(app => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${app.app_code}</td>
+                        <td>${app.app_name}</td>
+                        <td>${app.app_type}</td>
+                        <td>${app.host}</td>
+                        <td>${app.port}</td>
+                        <td>${app.network_id}</td>
+                        <td><span style="padding: 4px 8px; border-radius: 4px; background-color: ${app.status === 'ACTIVE' ? '#27ae60' : '#e74c3c'}; color: white;">${app.status}</span></td>
+                        <td>${app.environment}</td>
+                        <td>
+                            <button class="btn-small" onclick="editApplication(${app.id})">Edit</button>
+                            <button class="btn-small" style="background-color: #e74c3c;" onclick="deleteApplication(${app.id})">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading applications:', error);
+                showAlert('app-alert', `Error loading applications: ${error.message}`, 'error');
+            }
+        }
+
+        async function editApplication(id) {
+            try {
+                const response = await fetch(`/api/my-application/${id}`);
+                const app = await response.json();
+
+                currentEditingId = id;
+                document.getElementById('application-modal-title').textContent = 'Edit Application';
+                document.getElementById('app_code').disabled = true;
+                document.getElementById('app_code').value = app.app_code;
+                document.getElementById('app_name').value = app.app_name;
+                
+                await populateNetworkDropdown();
+                document.getElementById('app_network_id').value = app.network_id;
+                
+                document.getElementById('app_entity_id').value = app.entity_id || '';
+                document.getElementById('app_host').value = app.host;
+                document.getElementById('app_port').value = app.port;
+                document.getElementById('app_protocol').value = app.protocol;
+                document.getElementById('app_version').value = app.version || '';
+                document.getElementById('app_status').value = app.status;
+                document.getElementById('app_environment').value = app.environment;
+                document.getElementById('app_admin_name').value = app.administrator || '';
+                document.getElementById('app_admin_email').value = app.admin_email || '';
+                document.getElementById('app_admin_phone').value = app.admin_phone || '';
+                document.getElementById('app_description').value = app.description || '';
+
+                document.getElementById('application-modal').classList.add('active');
+            } catch (error) {
+                showAlert('app-alert', `Error loading application: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteApplication(id) {
+            if (!confirm('Are you sure you want to delete this application?')) return;
+
+            try {
+                const response = await fetch(`/api/my-application/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showAlert('app-alert', 'Application deleted successfully!', 'success');
+                    loadApplications();
+                } else {
+                    const data = await response.json();
+                    showAlert('app-alert', `Delete failed: ${data.detail}`, 'error');
+                }
+            } catch (error) {
+                showAlert('app-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // ===================== My Services Management =====================
+
+        async function populateApplicationDropdown() {
+            try {
+                const response = await fetch('/api/my-application');
+                const applications = await response.json();
+                const dropdown = document.getElementById('service_app_id');
+                
+                // Clear existing options except the placeholder
+                while (dropdown.options.length > 1) {
+                    dropdown.remove(1);
+                }
+                
+                // Add applications from the list
+                applications.forEach(app => {
+                    const option = document.createElement('option');
+                    option.value = app.id;
+                    option.textContent = `${app.app_name} (ID: ${app.id})`;
+                    dropdown.appendChild(option);
+                });
+                
+                dropdown.value = '';
+            } catch (error) {
+                showAlert('service-modal-alert', `Error loading applications: ${error.message}`, 'error');
+            }
+        }
+
+        function showAddServiceForm() {
+            currentEditingId = null;
+            document.getElementById('service-modal-title').textContent = 'Add Service';
+            document.getElementById('service_code').value = '';
+            document.getElementById('service_name').value = '';
+            
+            populateApplicationDropdown();
+            
+            document.getElementById('service_type').value = 'REST';
+            document.getElementById('service_method').value = 'GET';
+            document.getElementById('service_endpoint').value = '';
+            document.getElementById('service_full_url').value = '';
+            document.getElementById('service_api_version').value = 'v1.0';
+            document.getElementById('service_timeout').value = '30';
+            document.getElementById('service_retry').value = '3';
+            document.getElementById('service_status').value = 'ACTIVE';
+            document.getElementById('service_is_public').checked = false;
+            document.getElementById('service_description').value = '';
+            document.getElementById('service-modal').classList.add('active');
+        }
+
+        function closeServiceModal() {
+            document.getElementById('service-modal').classList.remove('active');
+            currentEditingId = null;
+        }
+
+        async function saveService() {
+            const service = {
+                service_code: document.getElementById('service_code').value,
+                service_name: document.getElementById('service_name').value,
+                app_id: parseInt(document.getElementById('service_app_id').value),
+                service_type: document.getElementById('service_type').value,
+                method: document.getElementById('service_method').value,
+                endpoint_path: document.getElementById('service_endpoint').value,
+                full_url: document.getElementById('service_full_url').value || null,
+                api_version: document.getElementById('service_api_version').value,
+                timeout: parseInt(document.getElementById('service_timeout').value),
+                retry_count: parseInt(document.getElementById('service_retry').value),
+                status: document.getElementById('service_status').value,
+                is_public: document.getElementById('service_is_public').checked,
+                description: document.getElementById('service_description').value
+            };
+
+            if (!service.service_code || !service.service_name || !service.app_id || !service.endpoint_path) {
+                showAlert('service-modal-alert', 'Please fill in all required fields', 'error');
+                return;
+            }
+
+            try {
+                const method = currentEditingId ? 'PUT' : 'POST';
+                const url = currentEditingId ? `/api/my-service/${currentEditingId}` : '/api/my-service';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(service)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('service-modal-alert', currentEditingId ? 'Service updated successfully!' : 'Service created successfully!', 'success');
+                    setTimeout(() => {
+                        closeServiceModal();
+                        loadServices();
+                    }, 1500);
+                } else {
+                    showAlert('service-modal-alert', `Save failed: ${data.detail}`, 'error');
+                }
+            } catch (error) {
+                showAlert('service-modal-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadServices() {
+            try {
+                const response = await fetch('/api/my-service');
+                const services = await response.json();
+
+                const tbody = document.getElementById('service-table-body');
+                tbody.innerHTML = '';
+
+                if (services.length === 0) {
+                    tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #999;">No services found</td></tr>';
+                    return;
+                }
+
+                services.forEach(service => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${service.service_code}</td>
+                        <td>${service.service_name}</td>
+                        <td>${service.service_type}</td>
+                        <td>${service.method}</td>
+                        <td><small>${service.endpoint_path}</small></td>
+                        <td>App ${service.app_id}</td>
+                        <td>${service.timeout}s</td>
+                        <td><span style="padding: 4px 8px; border-radius: 4px; background-color: ${service.status === 'ACTIVE' ? '#27ae60' : '#e74c3c'}; color: white;">${service.status}</span></td>
+                        <td>
+                            <button class="btn-small" onclick="editService(${service.id})">Edit</button>
+                            <button class="btn-small" style="background-color: #e74c3c;" onclick="deleteService(${service.id})">Delete</button>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                });
+            } catch (error) {
+                console.error('Error loading services:', error);
+                showAlert('serv-alert', `Error loading services: ${error.message}`, 'error');
+            }
+        }
+
+        async function editService(id) {
+            try {
+                const response = await fetch(`/api/my-service/${id}`);
+                const service = await response.json();
+
+                currentEditingId = id;
+                document.getElementById('service-modal-title').textContent = 'Edit Service';
+                document.getElementById('service_code').value = service.service_code;
+                document.getElementById('service_name').value = service.service_name;
+                
+                await populateApplicationDropdown();
+                document.getElementById('service_app_id').value = service.app_id;
+                
+                document.getElementById('service_type').value = service.service_type;
+                document.getElementById('service_method').value = service.method;
+                document.getElementById('service_endpoint').value = service.endpoint_path;
+                document.getElementById('service_full_url').value = service.full_url || '';
+                document.getElementById('service_api_version').value = service.api_version;
+                document.getElementById('service_timeout').value = service.timeout;
+                document.getElementById('service_retry').value = service.retry_count;
+                document.getElementById('service_status').value = service.status;
+                document.getElementById('service_is_public').checked = service.is_public;
+                document.getElementById('service_description').value = service.description || '';
+
+                document.getElementById('service-modal').classList.add('active');
+            } catch (error) {
+                showAlert('serv-alert', `Error loading service: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteService(id) {
+            if (!confirm('Are you sure you want to delete this service?')) return;
+
+            try {
+                const response = await fetch(`/api/my-service/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showAlert('serv-alert', 'Service deleted successfully!', 'success');
+                    loadServices();
+                } else {
+                    const data = await response.json();
+                    showAlert('serv-alert', `Delete failed: ${data.detail}`, 'error');
+                }
+            } catch (error) {
+                showAlert('serv-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // ===================== Client Services Management =====================
+
+        function showAddClientServiceForm() {
+            currentEditingId = null;
+            document.getElementById('client-service-modal-title').textContent = 'Add Client Service';
+            document.getElementById('client_ss_id').disabled = false;
+            document.getElementById('client_service_code').disabled = false;
+            
+            // Reset all fields
+            document.getElementById('client_ss_id').value = '';
+            document.getElementById('client_ss_name').value = '';
+            document.getElementById('client_ss_hostname').value = '';
+            document.getElementById('client_ss_ip').value = '';
+            document.getElementById('client_ss_port').value = '';
+            document.getElementById('client_ss_environment').value = '';
+            document.getElementById('client_entity_code').value = '';
+            document.getElementById('client_entity_name').value = '';
+            document.getElementById('client_app_code').value = '';
+            document.getElementById('client_app_name').value = '';
+            document.getElementById('client_service_code').value = '';
+            document.getElementById('client_service_name').value = '';
+            document.getElementById('client_service_type').value = 'REST';
+            document.getElementById('client_method').value = 'GET';
+            document.getElementById('client_endpoint_path').value = '';
+            document.getElementById('client_full_url').value = '';
+            document.getElementById('client_api_version').value = 'v1.0';
+            document.getElementById('client_tls_enabled').checked = true;
+            document.getElementById('client_certificate').value = '';
+            document.getElementById('client_certificate_expiry').value = '';
+            document.getElementById('client_timeout').value = '30';
+            document.getElementById('client_retry').value = '3';
+            document.getElementById('client_status').value = 'ACTIVE';
+            document.getElementById('client_source').value = 'MANUAL';
+            document.getElementById('client_last_synced').value = '';
+            
+            document.getElementById('client-service-modal').classList.add('active');
+        }
+
+        function closeClientServiceModal() {
+            document.getElementById('client-service-modal').classList.remove('active');
+            currentEditingId = null;
+        }
+
+        async function saveClientService() {
+            const service = {
+                ss_id: document.getElementById('client_ss_id').value,
+                ss_name: document.getElementById('client_ss_name').value,
+                ss_hostname: document.getElementById('client_ss_hostname').value,
+                ss_ip: document.getElementById('client_ss_ip').value,
+                ss_port: document.getElementById('client_ss_port').value ? parseInt(document.getElementById('client_ss_port').value) : null,
+                ss_environment: document.getElementById('client_ss_environment').value,
+                entity_code: document.getElementById('client_entity_code').value,
+                entity_name: document.getElementById('client_entity_name').value,
+                app_code: document.getElementById('client_app_code').value,
+                app_name: document.getElementById('client_app_name').value,
+                service_code: document.getElementById('client_service_code').value,
+                service_name: document.getElementById('client_service_name').value,
+                service_type: document.getElementById('client_service_type').value,
+                method: document.getElementById('client_method').value,
+                endpoint_path: document.getElementById('client_endpoint_path').value,
+                full_url: document.getElementById('client_full_url').value,
+                api_version: document.getElementById('client_api_version').value,
+                tls_enabled: document.getElementById('client_tls_enabled').checked,
+                certificate: document.getElementById('client_certificate').value || null,
+                certificate_expiry: document.getElementById('client_certificate_expiry').value || null,
+                timeout: parseInt(document.getElementById('client_timeout').value),
+                retry_count: parseInt(document.getElementById('client_retry').value),
+                status: document.getElementById('client_status').value,
+                source: document.getElementById('client_source').value,
+                last_synced_at: document.getElementById('client_last_synced').value || null
+            };
+
+            if (!service.ss_id || !service.service_code || !service.full_url) {
+                showAlert('client-service-modal-alert', 'Please fill in Security Server ID, Service Code, and Full URL', 'error');
+                return;
+            }
+
+            try {
+                const url = currentEditingId ? `/api/client-service-registry/${currentEditingId}` : '/api/client-service-registry';
+                const method = currentEditingId ? 'PUT' : 'POST';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(service)
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showAlert('client-service-modal-alert', currentEditingId ? 'Service updated successfully!' : 'Service created successfully!', 'success');
+                    closeClientServiceModal();
+                    loadClientServices();
+                } else {
+                    const data = await response.json();
+                    showAlert('client-service-modal-alert', `Save failed: ${data.detail}`, 'error');
+                }
+            } catch (error) {
+                showAlert('client-service-modal-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadClientServices() {
+            try {
+                const response = await fetch('/api/client-service-registry');
+                const services = await response.json();
+
+                const tableBody = document.getElementById('client-service-table-body');
+                tableBody.innerHTML = '';
+
+                if (services.length === 0) {
+                    tableBody.innerHTML = '<tr><td colspan="11" style="text-align: center; color: #999;">No client services found</td></tr>';
+                    return;
+                }
+
+                services.forEach(service => {
+                    const row = `
+                        <tr>
+                            <td>${service.ss_id || 'N/A'}</td>
+                            <td>${service.entity_code ? service.entity_code + ' (' + (service.entity_name || 'N/A') + ')' : 'N/A'}</td>
+                            <td>${service.app_code || 'N/A'}</td>
+                            <td>${service.service_code || 'N/A'}</td>
+                            <td>${service.service_name || 'N/A'}</td>
+                            <td>${service.service_type || 'N/A'}</td>
+                            <td>${service.method || 'N/A'}</td>
+                            <td style="max-width: 150px; word-break: break-all; font-size: 12px;">${service.full_url || 'N/A'}</td>
+                            <td><span style="background-color: ${service.status === 'ACTIVE' ? '#27ae60' : '#e74c3c'}; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${service.status}</span></td>
+                            <td><span style="background-color: #3498db; color: white; padding: 4px 8px; border-radius: 4px; font-size: 12px;">${service.source}</span></td>
+                            <td>
+                                <button class="btn-small" onclick="editClientService(${service.id})">Edit</button>
+                                <button class="btn-small" style="background-color: #e74c3c;" onclick="deleteClientService(${service.id})">Delete</button>
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+            } catch (error) {
+                showAlert('client-alert', `Error loading client services: ${error.message}`, 'error');
+            }
+        }
+
+        async function editClientService(id) {
+            try {
+                const response = await fetch(`/api/client-service-registry/${id}`);
+                const service = await response.json();
+
+                currentEditingId = id;
+                document.getElementById('client-service-modal-title').textContent = 'Edit Client Service';
+                document.getElementById('client_ss_id').disabled = true;
+                document.getElementById('client_service_code').disabled = true;
+                
+                document.getElementById('client_ss_id').value = service.ss_id;
+                document.getElementById('client_ss_name').value = service.ss_name || '';
+                document.getElementById('client_ss_hostname').value = service.ss_hostname || '';
+                document.getElementById('client_ss_ip').value = service.ss_ip || '';
+                document.getElementById('client_ss_port').value = service.ss_port || '';
+                document.getElementById('client_ss_environment').value = service.ss_environment || '';
+                document.getElementById('client_entity_code').value = service.entity_code || '';
+                document.getElementById('client_entity_name').value = service.entity_name || '';
+                document.getElementById('client_app_code').value = service.app_code || '';
+                document.getElementById('client_app_name').value = service.app_name || '';
+                document.getElementById('client_service_code').value = service.service_code;
+                document.getElementById('client_service_name').value = service.service_name || '';
+                document.getElementById('client_service_type').value = service.service_type || 'REST';
+                document.getElementById('client_method').value = service.method || 'GET';
+                document.getElementById('client_endpoint_path').value = service.endpoint_path || '';
+                document.getElementById('client_full_url').value = service.full_url || '';
+                document.getElementById('client_api_version').value = service.api_version || 'v1.0';
+                document.getElementById('client_tls_enabled').checked = service.tls_enabled !== false;
+                document.getElementById('client_certificate').value = service.certificate || '';
+                document.getElementById('client_certificate_expiry').value = service.certificate_expiry ? service.certificate_expiry.substring(0, 16) : '';
+                document.getElementById('client_timeout').value = service.timeout || 30;
+                document.getElementById('client_retry').value = service.retry_count || 3;
+                document.getElementById('client_status').value = service.status || 'ACTIVE';
+                document.getElementById('client_source').value = service.source || 'MANUAL';
+                document.getElementById('client_last_synced').value = service.last_synced_at ? service.last_synced_at.substring(0, 16) : '';
+
+                document.getElementById('client-service-modal').classList.add('active');
+            } catch (error) {
+                showAlert('client-alert', `Error loading client service: ${error.message}`, 'error');
+            }
+        }
+
+        async function deleteClientService(id) {
+            if (!confirm('Are you sure you want to delete this client service?')) return;
+
+            try {
+                const response = await fetch(`/api/client-service-registry/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showAlert('client-alert', 'Client service deleted successfully!', 'success');
+                    loadClientServices();
+                } else {
+                    const data = await response.json();
+                    showAlert('client-alert', `Delete failed: ${data.detail}`, 'error');
+                }
+            } catch (error) {
+                showAlert('client-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // ===================== Sync from Global Server =====================
+
+        function showSyncGlobalServicesModal() {
+            document.getElementById('sync-global-alert').innerHTML = '';
+            document.getElementById('sync_global_url').value = '';
+            document.getElementById('sync-global-modal').classList.add('active');
+        }
+
+        function closeSyncGlobalModal() {
+            document.getElementById('sync-global-modal').classList.remove('active');
+        }
+
+        async function syncFromGlobalServer() {
+            const globalUrl = document.getElementById('sync_global_url').value.trim();
+            if (!globalUrl) {
+                showAlert('sync-global-alert', 'Please enter the Global Server URL', 'error');
+                return;
+            }
+
+            const btn = document.getElementById('sync-global-btn');
+            btn.disabled = true;
+            btn.textContent = 'Syncing...';
+            document.getElementById('sync-global-alert').innerHTML = '';
+
+            try {
+                const response = await fetch('/api/sync-global-services', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ global_server_url: globalUrl })
+                });
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('sync-global-alert', data.message, 'success');
+                    loadClientServices();
+                    setTimeout(() => closeSyncGlobalModal(), 2000);
+                } else {
+                    showAlert('sync-global-alert', `Sync failed: ${data.detail}`, 'error');
+                }
+            } catch (error) {
+                showAlert('sync-global-alert', `Error: ${error.message}`, 'error');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '⟳ Sync Now';
+            }
+        }
+
+        document.getElementById('sync-global-modal').addEventListener('click', function(event) {
+            if (event.target === this) closeSyncGlobalModal();
+        });
+
+        // Global Server Configuration Functions
+        function closeGlobalServerModal() {
+            document.getElementById('global-server-modal').classList.remove('active');
+        }
+
+        async function loadGlobalServerConfigs() {
+            try {
+                const response = await fetch('/api/global-server');
+                if (response.ok) {
+                    const configs = await response.json();
+                    if (configs.length > 0) {
+                        // Load the first (or only) global server configuration into the form
+                        const config = configs[0];
+                        currentEditingId = config.id;
+                        document.getElementById('gs_edit_server_name').value = config.server_name;
+                        document.getElementById('gs_edit_server_url').value = config.server_url;
+                        document.getElementById('gs_edit_api_key').value = '';  // Don't show existing API key
+                        document.getElementById('gs_edit_description').value = config.description || '';
+                    } else {
+                        // No config exists yet, clear the form
+                        clearGlobalServerForm();
+                    }
+                } else {
+                    showAlert('global-server-alert', 'Failed to load Global Server configuration', 'error');
+                }
+            } catch (error) {
+                showAlert('global-server-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Modal close on background click
+        async function saveGlobalServerConfigDirect() {
+            const server_name = document.getElementById('gs_edit_server_name').value.trim();
+            const server_url = document.getElementById('gs_edit_server_url').value.trim();
+            const api_key = document.getElementById('gs_edit_api_key').value.trim();
+            const description = document.getElementById('gs_edit_description').value.trim();
+
+            if (!server_name || !server_url) {
+                showAlert('global-server-alert', 'Please fill in Server Name and Server URL', 'error');
+                return;
+            }
+
+            try {
+                const payload = {
+                    server_name: server_name,
+                    server_url: server_url,
+                    description: description
+                };
+
+                if (api_key) {
+                    payload.api_key = api_key;
+                }
+
+                const method = currentEditingId ? 'PUT' : 'POST';
+                const url = currentEditingId ? `/api/global-server/${currentEditingId}` : '/api/global-server';
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showAlert('global-server-alert', currentEditingId ? '✅ Configuration updated successfully!' : '✅ Configuration created successfully!', 'success');
+                    clearGlobalServerForm();
+                    loadGlobalServerConfigs();
+                } else {
+                    showAlert('global-server-alert', `Save failed: ${data.detail}`, 'error');
+                }
+            } catch (error) {
+                showAlert('global-server-alert', `Error: ${error.message}`, 'error');
+            }
+        }
+
+        // Clear the edit/add form
+        function clearGlobalServerForm() {
+            document.getElementById('gs_edit_server_name').value = '';
+            document.getElementById('gs_edit_server_url').value = '';
+            document.getElementById('gs_edit_api_key').value = '';
+            document.getElementById('gs_edit_description').value = '';
+            currentEditingId = null;
+        }
+
+        // Modal close on background click
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('network-modal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeNetworkModal();
+                }
+            });
+
+            document.getElementById('owner-modal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeOwnerModal();
+                }
+            });
+
+            document.getElementById('application-modal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeApplicationModal();
+                }
+            });
+
+            document.getElementById('service-modal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeServiceModal();
+                }
+            });
+
+            document.getElementById('client-service-modal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeClientServiceModal();
+                }
+            });
+
+            document.getElementById('certificate-view-modal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeCertificateModal();
+                }
+            });
+
+            document.getElementById('register-server-modal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeRegisterModal();
+                }
+            });
+
+            document.getElementById('global-server-modal').addEventListener('click', function(event) {
+                if (event.target === this) {
+                    closeGlobalServerModal();
+                }
+            });
+
+            loadCurrentDBConfig();
+            loadNetworkConfigs();
+            loadOwnerOrganisations();
+            loadEntitySelectDropdown();
+            loadApplications();
+            loadServices();
+            loadClientServices();
+            loadSignatureCertificates();
+            loadGlobalServerConfigs();
+        });
+    </script>
+</body>
+</html>
