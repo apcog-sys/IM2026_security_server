@@ -24,13 +24,6 @@ spec:
               value: "8000"
             - name: HOST
               value: "0.0.0.0"
-          volumeMounts:
-            - name: db-config
-              mountPath: /app/db_config.json
-              subPath: db_config.json
-              readOnly: true
-            - name: certificates
-              mountPath: /app/certificates
           livenessProbe:
             httpGet:
               path: /api/health
@@ -50,10 +43,4 @@ spec:
             limits:
               cpu: "500m"
               memory: "512Mi"
-      volumes:
-        - name: db-config
-          secret:
-            secretName: im-ss1-db-config
-        - name: certificates
-          persistentVolumeClaim:
-            claimName: im-ss1-certificates-pvc
+     
