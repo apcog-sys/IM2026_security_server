@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
         - name: im-ss1
-          image: msahique/im_ss1:v1
+          image: msahique/im_security_gateway:v1
           ports:
             - containerPort: 8000
           env:

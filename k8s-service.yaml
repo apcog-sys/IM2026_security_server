@@ -9,6 +9,6 @@ spec:
   ports:
   - name: http
     port: 80
-    targetPort: 9000               # your container's containerPort
+    targetPort: 8000               # your container's containerPort
     protocol: TCP
   type: ClusterIP
