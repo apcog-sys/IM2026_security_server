@@ -1,0 +1,55 @@
+INFO:__main__:DB configuration loaded from file
+C:\Users\Sahique\Desktop\new_workspace\2026\Informtion_mediator_v0.3\IM2026_security_server\ss1.py:2623: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Started server process [2796]
+INFO:     Waiting for application startup.
+INFO:__main__:Application startup complete
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+INFO:__main__:Retrieved 1 applications
+============================================================
+  Security Server  |  db: gateway1
+  http://0.0.0.0:8000
+  Docs: http://localhost:8000/docs
+============================================================
+INFO:     127.0.0.1:49290 - "GET /api/my-application HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49492 - "GET / HTTP/1.1" 200 OK
+INFO:__main__:Retrieved 1 network configurations
+INFO:     127.0.0.1:49492 - "GET /api/network HTTP/1.1" 200 OK
+INFO:__main__:Retrieved 1 applications
+INFO:     127.0.0.1:49493 - "GET /api/my-application HTTP/1.1" 200 OK
+INFO:__main__:Retrieved 1 services
+INFO:     127.0.0.1:49495 - "GET /api/my-service HTTP/1.1" 200 OK
+INFO:__main__:Found 3 signature certificate files
+INFO:     127.0.0.1:49492 - "GET /api/certificate/list/signature HTTP/1.1" 200 OK
+INFO:__main__:Retrieved 1 global server configurations
+INFO:     127.0.0.1:49496 - "GET /api/global-server HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49493 - "GET /api/client-service-registry HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49497 - "GET /api/db/get-config HTTP/1.1" 200 OK
+INFO:__main__:Retrieved 1 entities
+INFO:     127.0.0.1:49498 - "GET /api/entity HTTP/1.1" 200 OK
+INFO:__main__:Retrieved 1 network configurations
+INFO:     127.0.0.1:49495 - "GET /api/network HTTP/1.1" 200 OK
+INFO:__main__:Found 3 auth certificate files
+INFO:     127.0.0.1:49492 - "GET /api/certificate/list/auth HTTP/1.1" 200 OK
+INFO:__main__:Retrieved 1 global server configurations
+INFO:     127.0.0.1:49496 - "GET /api/global-server HTTP/1.1" 200 OK
+INFO:__main__:Retrieved 1 entities
+INFO:     127.0.0.1:49497 - "GET /api/entity HTTP/1.1" 200 OK
+INFO:__main__:Retrieved 1 network configurations
+INFO:     127.0.0.1:49493 - "GET /api/network HTTP/1.1" 200 OK
+INFO:__main__:Retrieved 1 network configurations
+INFO:     127.0.0.1:49493 - "GET /api/network HTTP/1.1" 200 OK
+INFO:__main__:Retrieved 1 entities
+INFO:     127.0.0.1:49493 - "GET /api/entity HTTP/1.1" 200 OK
+INFO:__main__:Found 3 signature certificate files
+INFO:     127.0.0.1:49536 - "GET /api/certificate/list/signature HTTP/1.1" 200 OK
+INFO:__main__:Retrieved 1 applications
+INFO:     127.0.0.1:49536 - "GET /api/my-application HTTP/1.1" 200 OK
+INFO:__main__:Retrieved 1 services
+INFO:     127.0.0.1:49536 - "GET /api/my-service HTTP/1.1" 200 OK

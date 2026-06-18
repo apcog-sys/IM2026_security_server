@@ -2629,6 +2629,11 @@
                 const tbody = document.getElementById('application-table-body');
                 tbody.innerHTML = '';
 
+                if (!response.ok || !Array.isArray(applications)) {
+                    const detail = (applications && applications.detail) ? applications.detail : `HTTP ${response.status}`;
+                    throw new Error(detail);
+                }
+
                 if (applications.length === 0) {
                     tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; color: #999;">No applications found</td></tr>';
                     return;
@@ -2717,7 +2722,12 @@
                 const response = await fetch('/api/my-application');
                 const applications = await response.json();
                 const dropdown = document.getElementById('service_app_id');
-                
+
+                if (!response.ok || !Array.isArray(applications)) {
+                    const detail = (applications && applications.detail) ? applications.detail : `HTTP ${response.status}`;
+                    throw new Error(detail);
+                }
+
                 // Clear existing options except the placeholder
                 while (dropdown.options.length > 1) {
                     dropdown.remove(1);
