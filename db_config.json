@@ -1,5 +1,5 @@
 {
-    "host": "localhost",
+    "host": "mysql-service",
     "port": 3306,
     "user": "root",
     "password": "root",
