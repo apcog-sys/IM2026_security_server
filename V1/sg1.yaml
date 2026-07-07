@@ -61,7 +61,7 @@ spec:
             periodSeconds: 5
         # mutual-TLS message port; waits for the shared auth cert
         - name: mtls
-          image: im-security-gateway:latest
+          image: msahique/security_gateway_2026:v1
           imagePullPolicy: IfNotPresent
           env:
             - { name: SG_MODE, value: "mtls" }
