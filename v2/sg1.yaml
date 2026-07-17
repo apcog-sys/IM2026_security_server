@@ -46,7 +46,7 @@ spec:
       containers:
         # admin/app port + async worker; bootstraps the auth cert into /app/certs
         - name: admin
-          image: im-security-gateway:latest
+          image: msahique/security_gateway_2026:v2
           imagePullPolicy: IfNotPresent
           env:
             - { name: SG_MODE, value: "admin" }
