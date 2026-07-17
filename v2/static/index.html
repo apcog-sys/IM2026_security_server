@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IM · Security Gateway</title>
+<style>
+  :root{--bg:#0f172a;--panel:#1e293b;--accent:#34d399;--muted:#94a3b8}
+  *{box-sizing:border-box}body{margin:0;font-family:Segoe UI,system-ui,sans-serif;background:var(--bg);color:#e2e8f0}
+  header{background:#064e3b;padding:16px 28px;border-bottom:3px solid var(--accent)}
+  header h1{margin:0;font-size:20px}header span{color:var(--muted);font-size:13px}
+  .tabs{display:flex;flex-wrap:wrap;gap:4px;background:#0b1220;padding:8px 28px;border-bottom:1px solid #334155}
+  .tabbtn{background:#1e293b;color:#cbd5e1;border:0;padding:8px 14px;border-radius:8px 8px 0 0;cursor:pointer;font-size:13px}
+  .tabbtn.active{background:var(--accent);color:#064e3b;font-weight:700}
+  main{max-width:1200px;margin:0 auto;padding:24px}
+  .panel{display:none}.panel.show{display:block}
+  .card{background:var(--panel);border-radius:10px;padding:18px;margin-bottom:18px;box-shadow:0 1px 3px #0006}
+  h2{font-size:15px;margin:0 0 12px;color:var(--accent)}
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th,td{text-align:left;padding:6px 8px;border-bottom:1px solid #334155}th{color:var(--muted)}
+  .pill{padding:2px 8px;border-radius:10px;font-size:11px;background:#334155}
+  .yes{background:#14532d;color:#86efac}.nope{background:#450a0a;color:#fca5a5}.pend{background:#451a03;color:#fcd34d}
+  label{display:block;font-size:12px;color:var(--muted);margin:8px 0 3px}
+  input,select{width:100%;background:#0b1220;border:1px solid #334155;color:#e2e8f0;padding:7px 10px;border-radius:6px}
+  .row{display:flex;gap:10px;flex-wrap:wrap}.row>div{flex:1;min-width:140px}
+  button{background:var(--accent);color:#064e3b;border:0;padding:8px 14px;border-radius:6px;cursor:pointer;font-weight:600;margin-top:10px;
+         transition:transform .06s ease, filter .15s ease, box-shadow .15s ease;user-select:none}
+  button:hover:not(:disabled){filter:brightness(1.12);box-shadow:0 0 0 2px #ffffff22}
+  button:active:not(:disabled){transform:translateY(1px) scale(.97);filter:brightness(.9)}
+  button:focus-visible{outline:2px solid #fff;outline-offset:2px}
+  button:disabled{opacity:.55;cursor:progress}
+  button.working{cursor:progress}
+  button.sm{padding:3px 8px;font-size:11px;margin:1px}
+  button.red{background:#7f1d1d;color:#fecaca}button.blue{background:#1d4ed8;color:#dbeafe}
+  code{color:#7dd3fc}.kv{font-size:13px;line-height:1.9}.kv b{color:var(--accent)}
+  #out{position:fixed;right:18px;bottom:18px;max-width:420px;background:#0b1220;border:1px solid #334155;border-radius:8px;padding:10px 14px;font-size:12px;color:#7dd3fc;display:none}
+</style>
+</head>
+<body>
+<header><h1>🛡️ <span id="title">Security Gateway</span></h1><span id="sub">security gateway</span></header>
+<div class="tabs" id="tabs"></div>
+<main>
+  <!-- STATUS -->
+  <section class="panel show" id="t-status"><div class="card"><h2>Gateway status</h2>
+    <div class="kv" id="status">loading…</div>
+    <button onclick="act('/api/provision','POST',null,this)">Register / provision</button>
+    <button class="blue" onclick="act('/api/globalconf/refresh','POST',null,this)">Refresh global config</button>
+    <button class="blue" onclick="act('/api/catalog/refresh','POST',null,this)">Sync catalog</button>
+  </div></section>
+
+  <!-- APPLICATIONS -->
+  <section class="panel" id="t-apps">
+    <div class="card"><h2>Register an application</h2>
+      <p style="color:var(--muted);font-size:12px">Class/code suggest known values from the global config — you can also type a new one.</p>
+      <div class="row">
+        <div><label>entity class</label><input id="a_ec" value="GOV" list="dl_entity_class"></div>
+        <div><label>entity code</label><input id="a_code" value="1001" list="dl_entity_code"></div>
+        <div><label>application code</label><input id="a_app" value="consumer-app"></div>
+        <div><label>entity name</label><input id="a_name" value="Ministry of Digital Affairs" list="dl_entity_name"></div>
+      </div>
+      <button onclick="addApp(this)">Create application</button>
+    </div>
+    <datalist id="dl_entity_class"></datalist>
+    <datalist id="dl_entity_code"></datalist>
+    <datalist id="dl_entity_name"></datalist>
+    <div class="card"><h2>Hosted applications</h2>
+      <label><input type="checkbox" id="appCascade"> cascade delete (also remove its services + subscriptions)</label>
+      <table><thead><tr><th>Application id</th><th></th></tr></thead><tbody id="apps"></tbody></table>
+    </div>
+  </section>
+
+  <!-- SERVICES -->
+  <section class="panel" id="t-services">
+    <div class="card"><h2>Publish a service</h2>
+      <div class="row">
+        <div style="flex:2"><label>hosted application (pick one — fills the fields below)</label>
+          <select id="sv_pick" onchange="pickApp()"></select></div>
+      </div>
+      <div class="row">
+        <div><label>entity class</label><input id="s_ec" value="GOV" list="dl_entity_class"></div>
+        <div><label>entity code</label><input id="s_code" value="2001"></div>
+        <div><label>application code</label><input id="s_app" value="registry"></div>
+        <div><label>service code</label><input id="s_svc" value="getPerson"></div>
+      </div>
+      <div class="row">
+        <div><label>backend url</label><input id="s_url" value="http://127.0.0.1:8090/backend/persons"></div>
+        <div><label>description</label><input id="s_desc" value="Look up a person by national id"></div>
+      </div>
+      <button onclick="addService(this)">Publish service</button>
+    </div>
+    <div class="card"><h2>Published services</h2>
+      <table><thead><tr><th>Service id</th><th>Backend</th><th></th></tr></thead><tbody id="services"></tbody></table>
+    </div>
+  </section>
+
+  <!-- CATALOG + SUBSCRIBE -->
+  <section class="panel" id="t-catalog">
+    <div class="card"><h2>Subscribe one of our applications to a service</h2>
+      <div class="row">
+        <div><label>our application id (hosted here)</label><select id="sub_app"></select></div>
+        <div><label>service id (from the catalog below)</label><select id="sub_svc"></select></div>
+      </div>
+      <button onclick="subscribe(document.getElementById('sub_app').value, document.getElementById('sub_svc').value, this)">Subscribe</button>
+    </div>
+    <div class="card"><h2>📚 Service catalog (synced from Global Server) <button class="sm blue" style="float:right" onclick="act('/api/catalog/refresh','POST')">Refresh</button></h2>
+      <table><thead><tr><th>Service id</th><th>Gateway</th><th></th></tr></thead><tbody id="catalog"></tbody></table>
+    </div>
+  </section>
+
+  <!-- CONSUME -->
+  <section class="panel" id="t-consume"><div class="card"><h2>📨 Consume a service (send a mediated request)</h2>
+    <p style="color:var(--muted);font-size:12px">Sends through this gateway as one of its hosted applications. The app must have an approved subscription.</p>
+    <label>Consumer application (hosted here)</label><select id="c_app"></select>
+    <label>Service id (from your subscriptions / catalog)</label><select id="c_svc"></select>
+    <label>HTTP method (invoked on the provider's backend)</label>
+    <select id="c_method"><option>POST</option><option>GET</option><option>PUT</option><option>PATCH</option><option>DELETE</option><option>HEAD</option></select>
+    <label>Request body (JSON) — must match the provider's backend</label>
+    <textarea id="c_body" rows="4">{ "qry": "show databases;" }</textarea>
+    <p style="color:var(--muted);font-size:12px">POST/PUT/PATCH send the body as JSON; GET/DELETE/HEAD send it as query params. The method is signed, so it cannot be altered in transit.</p>
+    <button onclick="consume()">Send mediated request →</button>
+    <pre id="c_resp" style="margin-top:12px;background:#0b1220;padding:12px;border-radius:8px;overflow:auto;font-size:12px;color:#7dd3fc;max-height:280px"></pre>
+  </div></section>
+
+
+  <!-- SUBSCRIPTIONS (consumer) -->
+  <section class="panel" id="t-subscriptions"><div class="card"><h2>📤 Our subscriptions (consumer side)</h2>
+    <table><thead><tr><th>Application</th><th>Service</th><th>Provider GW</th><th>Status</th><th></th></tr></thead><tbody id="subscriptions"></tbody></table>
+  </div></section>
+
+  <!-- SUBSCRIBERS (provider) -->
+  <section class="panel" id="t-subscribers"><div class="card"><h2>📥 Subscription requests (provider side) — approve / reject / revoke</h2>
+    <table><thead><tr><th>Service</th><th>Subscriber</th><th>Status</th><th>Action</th></tr></thead><tbody id="subscribers"></tbody></table>
+  </div></section>
+
+  <!-- MESSAGE LOG -->
+  <section class="panel" id="t-log"><div class="card"><h2>Message log (non-repudiation) <button class="sm red" style="float:right" onclick="act('/api/messagelog','DELETE')">Clear log</button></h2>
+    <table><thead><tr><th>Time</th><th>Dir</th><th>Consumer</th><th>Service</th><th>Sig</th><th>TS</th><th>Status</th><th>Note</th></tr></thead><tbody id="log"></tbody></table>
+  </div></section>
+</main>
+<div id="out"></div>
+<script>
+const enc = encodeURIComponent;
+const TABS = [['t-status','Status'],['t-apps','Applications'],['t-services','Services'],
+  ['t-catalog','Catalog & Subscribe'],['t-consume','Consume'],['t-subscriptions','Subscriptions'],['t-subscribers','Subscribers'],['t-log','Message Log']];
+document.getElementById('tabs').innerHTML = TABS.map((t,i)=>`<button class="tabbtn${i==0?' active':''}" data-tab="${t[0]}" onclick="tab('${t[0]}')">${t[1]}</button>`).join('');
+function tab(id){ document.querySelectorAll('.panel').forEach(p=>p.classList.remove('show')); document.getElementById(id).classList.add('show');
+  document.querySelectorAll('.tabbtn').forEach(b=>b.classList.remove('active')); document.querySelector(`[data-tab="${id}"]`).classList.add('active'); }
+function yn(v){return `<span class="pill ${v?'yes':'nope'}">${v?'✓':'✗'}</span>`}
+function toast(o){ const e=document.getElementById('out'); e.style.display='block'; e.textContent=typeof o=='string'?o:JSON.stringify(o); setTimeout(()=>e.style.display='none',4000); }
+async function api(url,method='GET',body){ const r=await fetch(url,{method,headers:body?{'Content-Type':'application/json'}:{},body:body?JSON.stringify(body):undefined}); let j; try{j=await r.json()}catch{ j={status:r.status} } return j; }
+
+// Escape for safe use inside an HTML attribute. (Values like backend URLs used
+// to be injected raw into onclick="..." which broke the attribute and silently
+// killed the button - hence data-* attributes + delegation below.)
+function esc(s){ return String(s??'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// Visible press feedback: disable + spinner text while the request is in flight.
+async function busy(btn, fn){
+  if(!btn) return fn();
+  const label = btn.innerHTML;
+  btn.disabled = true; btn.classList.add('working'); btn.innerHTML = '⏳';
+  try { return await fn(); }
+  finally { btn.disabled = false; btn.classList.remove('working'); btn.innerHTML = label; }
+}
+
+async function act(url,method,body,btn){ await busy(btn, async()=>{ toast(await api(url,method,body)); await load(); }); }
+async function del(url,btn){ if(!confirm('Delete this record?'))return; await busy(btn, async()=>{ toast(await api(url,'DELETE')); await load(); }); }
+function db(url){ return `<button class="sm red" data-act="del" data-url="${esc(url)}">Delete</button>`; }
+function eb(url,field,cur){ return `<button class="sm blue" data-act="edit" data-url="${esc(url)}" data-field="${esc(field)}" data-cur="${esc(cur||'')}">Edit</button>`; }
+async function edit(url,field,cur,btn){ const v=prompt(field+':',cur||''); if(v===null)return; const b={};b[field]=v;
+  await busy(btn, async()=>{ toast(await api(url,'PUT',b)); await load(); }); }
+async function decide(sc,sub,action,btn){ await busy(btn, async()=>{ toast(await api('/api/subscribers/'+(action==='approve'?'approve':'reject'),'POST',{service_code:sc,subscriber:sub})); await load(); }); }
+async function subscribe(appId,svcId,btn){ if(!appId){ toast('Select a hosted application first (create one in the Applications tab).'); return; }
+  await busy(btn, async()=>{ toast(await api('/api/subscribe','POST',{application_id:appId,service_id:svcId})); await load(); }); }
+
+// One delegated handler for every generated row button (survives table re-renders).
+document.addEventListener('click', (ev)=>{
+  const b = ev.target.closest('button[data-act]'); if(!b) return;
+  const d = b.dataset;
+  if(d.act==='del')       del(d.url, b);
+  else if(d.act==='edit') edit(d.url, d.field, d.cur, b);
+  else if(d.act==='decide') decide(d.svc, d.sub, d.decision, b);
+  else if(d.act==='subscribe') subscribe(val('sub_app'), d.svc, b);
+  else if(d.act==='delapp')  delApp(d.ec, d.code, d.app, b);
+});
+function fillSelect(id, values, placeholder){ const el=document.getElementById(id); if(!el)return; const cur=el.value;
+  if(!values.length){ el.innerHTML=`<option value="">${placeholder||'(none)'}</option>`; return; }
+  el.innerHTML=values.map(v=>`<option>${esc(v)}</option>`).join(''); if(values.includes(cur)) el.value=cur; }
+// <datalist> suggestions: dropdown help on fields where a NEW value is also valid.
+function fillList(id, values){ const el=document.getElementById(id); if(!el)return;
+  el.innerHTML=(values||[]).map(v=>`<option value="${esc(v)}">`).join(''); }
+// Picking a hosted application fills the entity/application fields of the service form.
+function pickApp(){ const v=document.getElementById('sv_pick').value; if(!v) return;
+  const p=v.split('/'); if(p.length<4) return;
+  document.getElementById('s_ec').value=p[1];
+  document.getElementById('s_code').value=p[2];
+  document.getElementById('s_app').value=p[3]; }
+async function consume(){
+  let body; try{ body=JSON.parse(document.getElementById('c_body').value); }catch(e){ toast('Invalid JSON in request body'); return; }
+  const r=await fetch('/api/consumer/request',{method:'POST',headers:{'IM-Consumer':document.getElementById('c_app').value,'IM-Service':document.getElementById('c_svc').value,'IM-Method':document.getElementById('c_method').value,'Content-Type':'application/json'},body:JSON.stringify(body)});
+  let j; try{ j=await r.json(); }catch{ j={status:r.status}; }
+  document.getElementById('c_resp').textContent='HTTP '+r.status+'\n'+JSON.stringify(j,null,2); load();
+}
+
+async function addApp(btn){ await busy(btn, async()=>{ toast(await api('/api/applications','POST',{entity_class:val('a_ec'),entity_code:val('a_code'),application_code:val('a_app'),entity_name:val('a_name')})); await load(); }); }
+async function addService(btn){ await busy(btn, async()=>{ toast(await api('/api/services','POST',{entity_class:val('s_ec'),entity_code:val('s_code'),application_code:val('s_app'),service_code:val('s_svc'),backend_url:val('s_url'),description:val('s_desc')})); await load(); }); }
+function val(id){ return document.getElementById(id).value.trim(); }
+
+async function load(){
+  const s = await api('/api/status');
+  document.getElementById('title').textContent = s.title||'Security Gateway';
+  document.getElementById('sub').textContent = `${s.gateway_code} · owner ${s.owner} · admin ${s.address}`;
+  document.getElementById('status').innerHTML =
+    `<div>Gateway code: <b>${s.gateway_code}</b></div><div>Registered with Global Server: ${yn(s.registered)}</div>
+     <div>Global config verified: ${yn(s.globalconf_verified)}</div><div>Auth cert serial: <code>${(s.auth_serial||'').slice(0,18)}…</code></div>`;
+  document.getElementById('apps').innerHTML = (s.applications||[]).map(c=>{const p=c.split('/');
+    return `<tr><td><code>${c}</code></td><td><button class="sm red" data-act="delapp" data-ec="${esc(p[1])}" data-code="${esc(p[2])}" data-app="${esc(p[3])}">Delete</button></td></tr>`;}).join('')||'<tr><td colspan=2>none</td></tr>';
+  const svc = await api('/api/services');
+  document.getElementById('services').innerHTML = svc.map(v=>{const ac=v.service_id.split('/')[3];
+    return `<tr><td><code>${v.service_id}</code></td><td>${v.backend_url}</td><td>${eb(`/api/services/${ac}/${v.service_code}`,'backend_url',v.backend_url)} ${db(`/api/services/${ac}/${v.service_code}`)}</td></tr>`;}).join('')||'<tr><td colspan=3>none</td></tr>';
+  const cat = await api('/api/catalog');
+  document.getElementById('catalog').innerHTML = cat.map(c=>`<tr><td><code>${c.service_id}</code></td><td>${c.gateway_code}</td>
+    <td><button class="sm" data-act="subscribe" data-svc="${esc(c.service_id)}">Subscribe…</button></td></tr>`).join('')||'<tr><td colspan=3>empty</td></tr>';
+  const subs = await api('/api/subscriptions');
+  document.getElementById('subscriptions').innerHTML = subs.map(x=>`<tr><td><code>${x.application_id}</code></td><td><code>${x.service_id}</code></td><td>${x.provider_gateway}</td>
+    <td><span class="pill ${x.status==='approved'?'yes':'pend'}">${x.status}</span></td><td>${db(`/api/subscriptions?application_id=${enc(x.application_id)}&service_id=${enc(x.service_id)}`)}</td></tr>`).join('')||'<tr><td colspan=5>none</td></tr>';
+  // ---- populate every picker from live data (no blank free-text guessing) ----
+  const svcOpts=[...new Set([...subs.map(x=>x.service_id), ...cat.map(c=>c.service_id)])];
+  fillSelect('sub_app', s.applications||[], '(create an application in the Applications tab first)');
+  fillSelect('sub_svc', cat.map(c=>c.service_id), '(catalog empty — Sync catalog on the Status tab)');
+  fillSelect('sv_pick', s.applications||[], '(no hosted applications yet)');
+  fillSelect('c_app', s.applications||[], '(no hosted applications yet)');
+  fillSelect('c_svc', svcOpts, '(subscribe to a service first)');
+  // suggestion lists for the "create" forms (typing a brand-new value still works)
+  const gconf = await api('/api/globalconf');
+  const ents = (gconf && gconf.entities) || [];
+  fillList('dl_entity_class', [...new Set(ents.map(e=>e.entity_class).filter(Boolean))]);
+  fillList('dl_entity_code',  [...new Set(ents.map(e=>e.entity_code).filter(Boolean))]);
+  fillList('dl_entity_name',  [...new Set(ents.map(e=>e.name).filter(Boolean))]);
+  const subr = await api('/api/subscribers');
+  document.getElementById('subscribers').innerHTML = subr.map(x=>{
+    const badge=x.status==='approved'?'<span class="pill yes">approved</span>':x.status==='rejected'?'<span class="pill nope">rejected</span>':'<span class="pill pend">pending</span>';
+    const action=x.status==='pending'?`<button class="sm" data-act="decide" data-svc="${esc(x.service_code)}" data-sub="${esc(x.subscriber)}" data-decision="approve">Approve</button> <button class="sm red" data-act="decide" data-svc="${esc(x.service_code)}" data-sub="${esc(x.subscriber)}" data-decision="reject">Reject</button>`
+      :db(`/api/subscribers?service_code=${enc(x.service_code)}&subscriber=${enc(x.subscriber)}`);
+    return `<tr><td><code>${x.service_id}</code></td><td><code>${x.subscriber}</code></td><td>${badge}</td><td>${action}</td></tr>`;}).join('')||'<tr><td colspan=4>none</td></tr>';
+  const lg = await api('/api/messagelog');
+  document.getElementById('log').innerHTML = lg.map(l=>`<tr><td>${(l.created_at||'').replace('T',' ').slice(0,19)}</td><td>${l.direction}</td>
+    <td><code>${l.consumer}</code></td><td><code>${(l.service||'').split('/').slice(-2).join('/')}</code></td>
+    <td>${yn(l.sig_verified)}</td><td>${yn(l.ts_verified)}</td><td>${l.response_status||''}</td><td>${l.note||''}</td></tr>`).join('');
+}
+async function delApp(c,code,app,btn){ if(!confirm('Delete application '+app+'?'))return;
+  const casc=document.getElementById('appCascade').checked?'?cascade=true':'';
+  await busy(btn, async()=>{ toast(await api(`/api/applications/${c}/${code}/${app}${casc}`,'DELETE')); await load(); }); }
+load(); setInterval(load, 5000);
+</script>
+</body>
+</html>

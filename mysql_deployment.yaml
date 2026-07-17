@@ -1,0 +1,109 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mysql
+spec:
+  replicas: 1                        # always 1 for MySQL
+  selector:
+    matchLabels:
+      app: mysql
+  template:
+    metadata:
+      labels:
+        app: mysql
+    spec:
+      containers:
+      - name: mysql
+        image: mysql:8
+        ports:
+        - containerPort: 3306
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: mysql-secret
+              key: root-password
+        volumeMounts:
+        - name: mysql-data
+          mountPath: /var/lib/mysql
+      volumes:
+      - name: mysql-data
+        persistentVolumeClaim:
+          claimName: mysql-pvc
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mysql-pvc
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 5Gi
+
+
+
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: istio-vs
+  namespace: default
+spec:
+  gateways:
+  - istio-gateway
+  hosts:
+  - '*'
+  http:
+  - match:
+    - headers:
+        referer:
+          regex: .*/im-tsa.*
+      uri:
+        prefix: /api/
+    route:
+    - destination:
+        host: tsa
+        port:
+          number: 9002
+  - match:
+    - uri:
+        prefix: /im-tsa/
+    - uri:
+        exact: /im-tsa
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: tsa
+        port:
+          number: 9002
+  - match:
+    - headers:
+        referer:
+          regex: .*/im-ss2.*
+      uri:
+        prefix: /api/
+    route:
+    - destination:
+        host: im-ss2-service
+        port:
+          number: 80
+  - match:
+    - uri:
+        prefix: /im-ss2/
+    - uri:
+        exact: /im-ss2
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: im-ss2-service
+        port:
+          number: 80
+  - route:
+    - destination:
+        host: fastapi-service
+        port:
+          number: 80
+
+

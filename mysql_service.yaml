@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mysql                  # Changed to 'mysql' for cleaner DNS matching
+  namespace: default
+spec:
+  type: ClusterIP
+  selector:
+    app: mysql                 # Matches the label on your MySQL pod
+  ports:
+  - port: 3306
+    targetPort: 3306
+    name: tcp-mysql            # CRITICAL: Istio needs the 'tcp-' prefix to route database mesh traffic      
